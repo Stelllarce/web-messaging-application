@@ -1,0 +1,25 @@
+.message-item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    cursor: default;
+}
+
+.message-item.clickable {
+    cursor: pointer;
+}
+
+.message-user {
+    margin: 0 0 5px 0;
+}
+
+.message-content {
+    margin: 0 0 5px 0;
+}
+
+.message-timestamp {
+    color: gray;
+}
+
+.highlight-word {
+    background-color: yellow;
+}

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "es6",                                  /* Set ECMAScript target version: ES6 for modern JavaScript features. */
+    "module": "commonjs",                             /* Use CommonJS module system (Node.js compatible). */
+    "rootDir": "./",                                  /* Where the TypeScript source files are. */
+    "outDir": "./dist",                               /* Where the compiled JavaScript files will go. */
+    "esModuleInterop": true,                          /* Allow default imports from modules with no default export. */
+
+    /* Type Checking */
+    "strict": true,                                   /* Enable all strict type-checking options. */
+    "forceConsistentCasingInFileNames": true,         /* Disallow incorrectly cased imports. */
+    "skipLibCheck": true                              /* Skip type checking of declaration files (.d.ts). */
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

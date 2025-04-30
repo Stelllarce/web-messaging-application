@@ -1,0 +1,27 @@
+.channel-messages-container {
+    display: flex;
+}
+
+.search-panel,
+.messages-panel {
+    width: 50%;
+    padding: 20px;
+    height: 630px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.search-panel {
+    border-right: 1px solid gray;
+}
+
+.message-after-click {
+    background-color: white;
+    transition: background-color 3s ease;
+}
+
+.message-click{
+    background-color:palegreen;
+}
+
+
