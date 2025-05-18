@@ -1,0 +1,261 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background: #ffffff;
+  justify-content: space-between;
+  position: relative;
+}
+
+.sidebar {
+  width: 300px;
+  background: #ffffff;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+}
+
+.sidebar h2 {
+  margin: 0;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  background: #4F46E5;
+  color: white;
+}
+
+.dropdown {
+  margin-bottom: 0;
+}
+
+.dropdown-btn {
+  background: #E0E7FF;
+  color: #1f2937;
+  padding: 10px;
+  width: 100%;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  border: 1px solid #CBD5E1;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-btn:hover {
+  background-color: #6366F1;
+  color: white;
+}
+
+.dropdown-btn .arrow {
+  margin-left: auto;
+  font-size: 14px;
+}
+
+.dropdown-content {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 5px;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+.dropdown-content li {
+  padding: 8px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-bottom: 1px solid #eee;
+}
+
+.dropdown-content li:hover {
+  background-color: #f0f0f0;
+}
+
+.sub-dropdown {
+  margin-left: 10px;
+}
+
+.sub-dropdown-content {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 5px;
+}
+
+.sub-dropdown-content li {
+  padding: 8px 0;
+  cursor: pointer;
+  padding-left: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.sub-dropdown-content li:hover {
+  background-color: #f0f0f0;
+}
+
+.sub-dropdown-add-btn {
+  background: #4F46E5;
+  color: white;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.sub-dropdown-add-btn:hover {
+  background: #6366F1;
+}
+
+.chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #e5ddd5;
+  border-radius: 20px;
+}
+
+.chat-header {
+  background-color: rgba(255, 255, 255, 0.9);
+  height: 10%;
+  padding-left: 15px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.chat-header .options-btn {
+  background: #4F46E5;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  margin-left: auto;
+  border-radius: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.chat-header .options-btn:hover {
+  background: #6366F1;
+}
+
+.options-panel {
+  width: 0;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  background-color: #ffffff;
+  border-radius: 20px;
+}
+
+.container.options-open .options-panel {
+  width: 300px;
+}
+
+.options-panel button {
+  background: #E0E7FF;
+  color: #1f2937;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.options-panel button:hover {
+  background: #6366F1;
+  color: white;
+}
+
+.options-panel input[type="text"] {
+  width: 90%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 10px;
+}
+
+.container.options-open .chat {
+  flex: 0 0 calc(100% - 600px);
+}
+
+#messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-left,
+.message-right {
+  max-width: 60%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  word-wrap: break-word;
+}
+
+.message-left {
+  align-self: flex-start;
+  background: white;
+}
+
+.message-right {
+  align-self: flex-end;
+  background: #dcf8c6;
+}
+
+.input-area {
+  display: flex;
+  padding: 10px;
+  background: #fff;
+  border-top: 1px solid #ddd;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  margin-right: 10px;
+}
+
+.input-area button {
+  padding: 10px 20px;
+  border: none;
+  background: #4F46E5;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.input-area button:hover {
+  background-color: #6366F1;
+}
+
+.modal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 20px;
+  border: 2px solid #4F46E5;
+  border-radius: 8px;
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content {
+  text-align: left;
+}
