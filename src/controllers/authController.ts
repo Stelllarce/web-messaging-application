@@ -12,7 +12,7 @@ import { RefreshTokenModel } from "../models/tokenModel";
 export const authController = Router();
 
 
-authController.post("/token", async (req: Request, res: Response) => {
+authController.post("/token",  async (req: Request, res: Response) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
         res.status(401).send({ error: "No token provided" });
@@ -20,7 +20,7 @@ authController.post("/token", async (req: Request, res: Response) => {
     }
 
 
-    const token = await RefreshTokenModel.findOne({refreshToken})
+    const token = await RefreshTokenModel.findOne({refreshToken: refreshToken});
 
     if (!token) {
         res.status(403).send({ error: "Invalid token" });
@@ -28,11 +28,14 @@ authController.post("/token", async (req: Request, res: Response) => {
     }
 
     try {
+        console.log(12);
         const user = verify(refreshToken, process.env.REFRESH_TOKEN as string) as IUser;
-        const newAccessToken = sign(user, process.env.ACCESS_TOKEN as string, {
+        console.log(user);
+        const newAccessToken = sign({username: user.username, password: user.password}, process.env.ACCESS_TOKEN as string, {
             expiresIn: "15m",
         });
         res.status(200).send({ accessToken: newAccessToken });
+        return
     }
     catch (err) {
         RefreshTokenModel.findOneAndDelete({refreshToken})
@@ -71,9 +74,9 @@ authController.post("/register" , async (req: Request, res: Response) => {
     })
 
     await createdUser.save();
-
+    newUser.password = password;
     const { accessToken, refreshToken } = generateAccessToken(newUser);
-    
+    await saveRefreshToken({refreshToken});
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: true,
@@ -109,7 +112,7 @@ authController.post("/login", async (req: Request, res: Response) => {
     }
 
     
-
+    user.password = foundUser.password;
     const tokens: IToken = generateAccessToken(user)
 
     await saveRefreshToken(tokens as IRefreshToken)
@@ -121,12 +124,13 @@ authController.post("/login", async (req: Request, res: Response) => {
         maxAge: 7 * 24 * 60 * 60 * 1000
     })
 
-    res.status(200).send({accessToken: tokens.accessToken})
+    res.status(200).send({"accessToken": tokens.accessToken});
 
 });
 
 authController.post("/logout", async (req: Request, res: Response) => {
     const refreshToken = req.cookies.refreshToken
+
 
     if (!refreshToken) {
         res.status(400).send({error : "No token provided"})
@@ -141,7 +145,7 @@ authController.post("/logout", async (req: Request, res: Response) => {
         return;
     }
 
-    res.status(204).send("Logged out");
+    res.status(204).send({result: "Logged out"});
 })
 
 authController.get("/user", verifyToken, async (req: Request, res: Response) => {

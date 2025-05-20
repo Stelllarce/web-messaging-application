@@ -5,7 +5,7 @@ const apiController = Router();
 
 export const connect = (app : Application): void => {
     
-    apiController.use('/auth', authController)
+    apiController.use('/auth', authController) // api/auth/register
 
     // apiController.use('/fdsf', ...)
     // apiController.use('/fdsf', ...)

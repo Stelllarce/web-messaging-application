@@ -22,7 +22,7 @@ export const saveRefreshToken = (refreshToken: IRefreshToken) => {
     const toAddToken = refreshToken.refreshToken;
 
     const token = new RefreshTokenModel({
-        toAddToken
+        refreshToken: toAddToken
     });
 
     return token.save();
