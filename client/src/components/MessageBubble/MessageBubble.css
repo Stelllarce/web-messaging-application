@@ -1,0 +1,18 @@
+.message-left,
+.message-right {
+  max-width: 60%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  word-wrap: break-word;
+}
+
+.message-left {
+  align-self: flex-start;
+  background: white;
+}
+
+.message-right {
+  align-self: flex-end;
+  background: #dcf8c6;
+}
