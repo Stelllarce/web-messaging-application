@@ -2,7 +2,7 @@ import express from 'express';
 import http from 'http';
 import { Server, Socket } from 'socket.io';
 import path from 'path';
-import { ChatMessage, User, ChannelEvent } from '../shared/types';
+import { ChatMessage, User, ChannelEvent } from '../src/interfaces/types';
 
 const app = express();
 const server = http.createServer(app);

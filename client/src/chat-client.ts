@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { ChatMessage, User, ChannelEvent} from '../../shared/types';
+import { ChatMessage, User, ChannelEvent} from '../../server/src/interfaces/types';
 
 export class ChatClient {
   private socket: Socket;

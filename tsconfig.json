@@ -102,8 +102,8 @@
   },
   "include": [
     "server/**/*",
-    "public/**/*"
-  ],
+    "client/public/**/*"
+, "client/src/chat-client.ts"  ],
   "exclude": [
     "node_modules",
     "dist"
