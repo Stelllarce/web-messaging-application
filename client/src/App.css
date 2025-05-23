@@ -1,0 +1,11 @@
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.container.options-open .chat {
+  flex: 0 0 calc(100% - 600px); /* sidebar 300px + options 300px */
+}
