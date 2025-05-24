@@ -4,8 +4,10 @@ import Sidebar from './components/Sidebar/Sidebar';
 import Chat from './components/Chat/Chat';
 import OptionsPanel from './components/OptionsPanel/OptionsPanel';
 import Modal from './components/Modal/Modal';
+import { RefManager, useRefManager } from './components/RefMessagesManager';
 
 interface Message {
+  id: number;
   text: string;
   side: 'left' | 'right';
 }
@@ -35,7 +37,7 @@ const App: React.FC = () => {
   const handleSend = () => {
     if (input.trim()) {
       const side = Math.random() > 0.5 ? 'left' : 'right';
-      setMessages([...messages, { text: input.trim(), side }]);
+      setMessages([...messages, { id: Date.now(), text: input.trim(), side }]);
       setInput('');
     }
   };
@@ -83,11 +85,31 @@ const App: React.FC = () => {
   const loadChannel = (name: string) => {
     setCurrentChannel(name);
     setMessages(name === 'General' ? [
-      { text: 'zdr', side: 'left' },
-      { text: 'kp', side: 'right' },
-      { text: 'web', side: 'left' }
+      { id: 0, text: 'zdr', side: 'left' },
+      { id: 1, text: 'kp', side: 'right' },
+      { id: 2, text: 'wezdrb', side: 'left' },
+      { id: 3, text: 'web', side: 'left' },
+      { id: 4, text: 'zdr hey', side: 'right' },
+      { id: 5, text: 'webzdr', side: 'right' },
     ] : []);
   };
+
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [confirmedQuery, setConfirmedQuery] = useState('');
+
+  const { getTarget } = useRefManager();
+  const scrollToMessage = (id: number) => {
+  const target = getTarget("message", id);
+  if (target) {
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    target.classList.add("message-click");
+    setTimeout(() => {
+      target.classList.remove("message-click");
+      target.classList.add("message-after-click");
+    }, 3000);
+  }
+};
 
   return (
     <div className={`container ${optionsOpen ? 'options-open' : ''}`}>
@@ -110,7 +132,6 @@ const App: React.FC = () => {
         }}
         loadChannel={loadChannel}
       />
-
       <Chat
         currentChannel={currentChannel}
         messages={messages}
@@ -120,7 +141,18 @@ const App: React.FC = () => {
         toggleOptions={() => setOptionsOpen(prev => !prev)}
       />
 
-      {optionsOpen && <OptionsPanel />}
+      {optionsOpen && (
+      <OptionsPanel
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        confirmedQuery={confirmedQuery}
+        setConfirmedQuery={setConfirmedQuery}
+        filteredMessages={confirmedQuery === '' ? [] : messages.filter((msg) =>
+          msg.text.toLowerCase().includes(confirmedQuery.toLowerCase())
+        )}
+        scrollToMessage={scrollToMessage}
+      />
+    )}
 
       {userModalOpen && (
         <Modal

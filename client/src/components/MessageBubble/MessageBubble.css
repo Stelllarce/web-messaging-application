@@ -16,3 +16,18 @@
   align-self: flex-end;
   background: #dcf8c6;
 }
+
+.message-click {
+  animation: flash 0.5s ease-in-out;
+  background-color: #fffa9c;
+  transition: background-color 0.5s;
+}
+
+.message-after-click {
+  background-color: transparent;
+}
+
+@keyframes flash {
+  0% { background-color: #fffa9c; }
+  100% { background-color: transparent; }
+}
