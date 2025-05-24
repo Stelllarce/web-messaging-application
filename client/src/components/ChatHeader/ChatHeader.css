@@ -1,0 +1,23 @@
+.chat-header {
+  background-color: rgba(255, 255, 255, 0.9);
+  height: 60px;
+  padding-left: 15px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.options-btn {
+  background: #4F46E5;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  margin-left: auto;
+  border-radius: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.options-btn:hover {
+  background: #6366F1;
+}

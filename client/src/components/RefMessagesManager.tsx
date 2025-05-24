@@ -3,7 +3,7 @@ import { createContext, useContext, useRef } from "react"
 import type { ReactNode } from "react"
 
 type TargetsType = {
-    targetsRef: React.RefObject<Record<number, HTMLElement>>;
+  targetsRef: React.RefObject<Record<number, HTMLElement | null>>;
 }
 
 type RefManagerContextType = {

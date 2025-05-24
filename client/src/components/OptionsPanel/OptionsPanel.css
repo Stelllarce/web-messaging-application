@@ -1,0 +1,36 @@
+.options-panel {
+  width: 300px;
+  height: 100%;
+  background-color: #ffffff;
+  border-left: 1px solid #eee;
+  transition: all 0.3s ease;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.options-panel .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.options-panel input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.options-panel button {
+  background: #E0E7FF;
+  color: #1f2937;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.options-panel button:hover {
+  background: #6366F1;
+  color: white;
+}

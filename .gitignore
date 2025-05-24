@@ -1,30 +1,80 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Node.js dependencies
 **/node_modules/
-.pnp
-.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# production
-dist/
+# Logs
+logs/
+*.log
+logs/*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
 
-# Vite cache
-.vite/
+# Build output
+**/dist/
+build/
+*.cache
 
-# environment variables
+# Dependency directories
+jspm_packages/
+
+# Testing
+coverage/
+*.lcov
+
+# Environment variables
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# misc
-.DS_Store
-
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# IDEs/editors
+# IDE files
 .vscode/
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# MacOS files
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+
+# React Native
+.expo/
+.expo-shared/
+
+# Parcel-bundler cache
+.cache/
+
+# SvelteKit
+.svelte-kit/
+
+# Next.js
+.next/
+out/
+
+# Storybook
+.storybook-out/
+
+# Miscellaneous
+*.lock-wscript
+*.log
+*.gz
+*.tgz
+*.zip
+*.bak
+*.old
+*.orig
+*.rej
+*.patch
+*.sublime-workspace
+*.sublime-project
