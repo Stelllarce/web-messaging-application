@@ -1,4 +1,4 @@
-import { Router, RequestHandler, Request, Response } from 'express';
+import { Router, RequestHandler } from 'express';
 import { Channel } from '../models/Channel';
 import { Message } from '../models/Message';
 
@@ -36,7 +36,8 @@ const getChannelsForUser: RequestHandler<{ userId: string }> = async (req, res) 
     const { userId } = req.params;
 
     const channels = await Channel.find({
-      $or: [{ users: '*'}, { users: userId }]
+      type: 'private',
+      members: userId
     });
 
     res.json(channels);
@@ -45,18 +46,20 @@ const getChannelsForUser: RequestHandler<{ userId: string }> = async (req, res) 
   }
 };
 
+
 const getChannelMessagesForUser: RequestHandler<{ id: string }> = async (req, res) => {
   try {
     const { id } = req.params;
 
     const channels = await Channel.find({
-      $or: [{ users: '*'}, { users: id }]
+      type: 'private',
+      members: id
     });
 
     const result = [];
 
     for (const channel of channels) {
-      const messages = await Message.find({ to: channel._id, toModel: 'Channel' })
+      const messages = await Message.find({ to: channel._id }) 
         .populate('from', 'username')
         .sort({ timestamp: 1 });
 
@@ -73,26 +76,29 @@ const getChannelMessagesForUser: RequestHandler<{ id: string }> = async (req, re
   }
 };
 
+
 const getChannelParticipants: RequestHandler<{ id: string }> = async (req, res) => {
   try {
     const { id } = req.params;
-    const channel = await Channel.findById(id).populate('users', 'username');
+    const channel = await Channel.findById(id).populate('members', 'username');
+
     if (!channel) {
       res.status(404).json({ error: 'Channel not found' });
       return;
     }
+
     res.json({
       _id: channel._id,
       name: channel.name,
       type: channel.type,
-      chatType: channel.chatType,
-      users: channel.users,
+      members: channel.members,
     });
   } catch (err) {
     console.error('Error loading participants:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 router.get('/', getPublicChannels);
 router.get('/user/:userId', getChannelsForUser);

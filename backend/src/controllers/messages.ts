@@ -1,17 +1,19 @@
-import { Router, RequestHandler } from 'express';
+import { Router, Request, Response } from 'express';
 import { findMessagesByTarget, findMessagesBetweenUsers, sendMessage } from '../utils/database';
 import { User } from '../models/User';
 import { Channel } from '../models/Channel';
+import mongoose from 'mongoose';
 
 const router = Router();
 
-const getMessages: RequestHandler<{ id: string }> = async (req, res) => {
+// GET /messages/:id – Взима съобщения за канал или разговор между двама потребители
+const getMessages = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const me = await User.findOne({ isMe: true });
 
-    if (!me) {
-      res.status(500).json({ error: 'Me user not found' });
+    const me = await User.findOne({ isMe: true });
+    if (!me || !(me._id instanceof mongoose.Types.ObjectId)) {
+      res.status(500).json({ error: 'Me user not found or invalid ID' });
       return;
     }
 
@@ -36,16 +38,25 @@ const getMessages: RequestHandler<{ id: string }> = async (req, res) => {
   }
 };
 
-const postMessage: RequestHandler = async (req, res) => {
+// POST /messages – Изпраща съобщение до потребител или канал
+const postMessage = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { fromId, toId, toModel, text } = req.body;
+    const { fromId, toId, text } = req.body;
 
-    if (!fromId || !toId || !toModel || !text) {
+    if (!fromId || !toId || !text) {
       res.status(400).json({ error: 'Missing fields' });
       return;
     }
 
-    const message = await sendMessage(fromId, toId, toModel, text);
+    const toUser = await User.findById(toId);
+    const toChannel = await Channel.findById(toId);
+
+    if (!toUser && !toChannel) {
+      res.status(404).json({ error: 'Target user or channel not found' });
+      return;
+    }
+
+    const message = await sendMessage(fromId, toId, text);
     res.status(201).json(message);
   } catch (error) {
     console.error('Error in POST /messages:', error);

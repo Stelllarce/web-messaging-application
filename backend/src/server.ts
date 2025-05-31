@@ -37,7 +37,6 @@ mongoose.connect(mongoUri)
   next();
 });
 
-//controllers
 app.use('/structure', structureRoutes);
 app.use('/messages', messageRoutes);
 app.use('/users', userRoutes);
@@ -51,10 +50,8 @@ app.get('/', (req, res) => {
 
 
 mongoose.connection.once('open', async () => {
-  //console.log('Стартиране на seedData...');
   try {
     await seedData(true);
-    //console.log('SeedData е приключено успешно');
   } catch (err) {
     //console.error('Грешка при seedData:', err);
   }

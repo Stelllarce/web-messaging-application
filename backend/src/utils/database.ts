@@ -14,41 +14,29 @@ export async function createUser(username: string, password: string, isMe = fals
 export async function createChannel(
   name: string,
   type: 'public' | 'private',
-  users: string[] = [],
-  chatType?: 'group' | 'people',
   members: mongoose.Types.ObjectId[] = []
 ) {
-  if (type === 'private' && users.includes('*')) {
-    throw new Error("Private cannel cannot contain '*' in users.");
+  if (type === 'private' && members.length === 0) {
+    throw new Error('Private channel must have members.');
   }
 
   const channel = new Channel({
     name,
     type,
-    chatType: type === 'private' ? chatType : undefined,
-    users,
-    members,
+    members: type === 'private' ? members : [],
+    messages: [],
   });
 
   await channel.save();
   return channel;
 }
 
-export async function sendMessage(
-  fromId: string,
-  toId: string,
-  toModel: 'User' | 'Channel',
-  text: string
-) {
-  const message = new Message({
-    from: fromId,
-    to: toId,
-    toModel,
-    text,
-  });
+export async function sendMessage(fromId: string, toId: string, text: string) {
+  const message = new Message({ from: fromId, to: toId, text });
   await message.save();
   return message;
 }
+
 
 export async function findUserById(id: string) {
   return await User.findById(id);
@@ -94,7 +82,6 @@ export async function seedData(force = false) {
   const channelsCount = await Channel.countDocuments();
 
   if (!force && (usersCount > 0 || channelsCount > 0)) {
-    // console.log('Данните вече съществуват, пропускаме seed.');
     return;
   }
 
