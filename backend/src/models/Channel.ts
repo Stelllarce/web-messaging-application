@@ -13,7 +13,14 @@ const channelSchema = new Schema<IChannel>({
   name: { type: String, required: true },
   type: { type: String, enum: ['public', 'private'], required: true },
 
-  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  members: {
+  type: [mongoose.Schema.Types.ObjectId],
+  ref: 'User',
+  required: function (this: any) {
+    return this.type === 'private';
+  },
+  default: undefined
+},
 
   messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],
 });
