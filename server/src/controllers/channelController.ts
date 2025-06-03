@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { Channel } from "../models/Channel";
+import { User } from "../models/User";
 import { verifyToken } from "../middlewares/verifyToken";
 
 export const channelController = Router();
@@ -35,11 +36,19 @@ channelController.get('/:id/messages', verifyToken, async (req: Request, res: Re
 channelController.get('/:id/users ', verifyToken, async (req: Request, res: Response) => {
     const { id } = req.params;
     const channel = await Channel.findById(id);
-    if (!channel || channel.type !== 'private') {
+    if (!channel) {
         res.status(404).json({ message: 'Channel not found' });
         return;
     }
-    await channel.populate('users', 'username');
-    res.status(200).json(channel.users);
+
+    let users;
+    if (channel.type !== 'private') {
+        users = await User.find({}, 'username');
+    } else if (channel.type === 'private') {
+        await channel.populate('users', 'username');
+        users = channel.users;
+    }
+
+    res.status(200).json(users);
 });
 
