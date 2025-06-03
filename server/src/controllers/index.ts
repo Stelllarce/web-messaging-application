@@ -10,6 +10,7 @@ const apiController = Router();
 export const connect = (app : Application): void => {
     
     apiController.use('/auth', authController) // api/auth/register
+    
     apiController.use('/messages', messages);
     apiController.use('/structure', structure);
     apiController.use('/users', users);

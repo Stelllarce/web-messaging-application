@@ -5,7 +5,7 @@ import { IMessage } from './Message';
 export interface IChannel extends Document {
   name: string;
   type: 'public' | 'private';
-  members?: mongoose.Types.ObjectId[]; 
+  users?: mongoose.Types.ObjectId[]; 
   messages: mongoose.Types.ObjectId[];
 }
 
@@ -13,7 +13,7 @@ const channelSchema = new Schema<IChannel>({
   name: { type: String, required: true },
   type: { type: String, enum: ['public', 'private'], required: true },
 
-  members: {
+  users: {
   type: [mongoose.Schema.Types.ObjectId],
   ref: 'User',
   required: function (this: any) {
