@@ -104,3 +104,15 @@ export async function seedData(force = false) {
     await Message.deleteMany({});
   }
 }
+
+
+
+export const getPrivateChannelsByUserId = async (userId: string) => {
+
+  if (!userId) throw new Error('User ID missing');
+
+  const user = await User.findById(userId).populate('privateChannels');
+  if (!user) throw new Error('User not found');
+
+  return user.privateChannels;
+};

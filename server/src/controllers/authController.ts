@@ -1,11 +1,11 @@
 import { Router, Request, Response } from "express";
 import { compareSync, hash } from "bcrypt";
 import { verify, sign } from "jsonwebtoken";
-import { IUser, IAuthenticatedUserRequest } from "../interfaces/userInterface"
+import { IUser, IAuthenticatedUserRequest } from "../models/User";
 import { IRefreshToken, IToken } from "../interfaces/tokenInterface";
 import { generateAccessToken, saveRefreshToken } from "../utils/tokens";
 import { verifyToken } from "../middlewares/verifyToken";
-import { UserModel } from "../models/userModel";
+import { User } from "../models/User";
 import { RefreshTokenModel } from "../models/tokenModel";
 
 
@@ -51,14 +51,14 @@ authController.post("/register" , async (req: Request, res: Response) => {
     console.log("Registering user");
     const newUser = req.body as IUser;
 
-    if (!newUser.username || !newUser.password)
+    if (!newUser.username || !newUser.password || !newUser.email)
     {
         res.status(400).send({error : "Missing parameters to user"});
         return;
     }
 
 
-    const user = await UserModel.findOne({username : newUser.username});
+    const user = await User.findOne({username : newUser.username});
 
     if (user)
     {
@@ -68,14 +68,15 @@ authController.post("/register" , async (req: Request, res: Response) => {
     
     const password = await hash(newUser.password, 10);
 
-    const createdUser = new UserModel({
+    const createdUser = new User({
+        email: newUser.email,
         username: newUser.username,
         password: password
     })
 
     await createdUser.save();
     newUser.password = password;
-    const { accessToken, refreshToken } = generateAccessToken(newUser);
+    const { accessToken, refreshToken } = generateAccessToken(createdUser);
     await saveRefreshToken({refreshToken});
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -90,14 +91,14 @@ authController.post("/register" , async (req: Request, res: Response) => {
 authController.post("/login", async (req: Request, res: Response) => {
     const user = req.body as IUser;
 
-    if (!user.username || !user.password)
+    if (!user.username || !user.password || !user.email)
     {
         res.status(400).send({error : "Missing parameters to user"});
         return;
     }
 
 
-    const foundUser = await UserModel.findOne({username: user.username})
+    const foundUser = await User.findOne({email: user.email})
 
     if (!foundUser)
     {
@@ -113,7 +114,7 @@ authController.post("/login", async (req: Request, res: Response) => {
 
     
     user.password = foundUser.password;
-    const tokens: IToken = generateAccessToken(user)
+    const tokens: IToken = generateAccessToken(foundUser)
 
     await saveRefreshToken(tokens as IRefreshToken)
     

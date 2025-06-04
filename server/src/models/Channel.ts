@@ -3,6 +3,7 @@ import { IUser } from './User';
 import { IMessage } from './Message';
 
 export interface IChannel extends Document {
+  _id: mongoose.Types.ObjectId;
   name: string;
   type: 'public' | 'private';
   users?: mongoose.Types.ObjectId[]; 

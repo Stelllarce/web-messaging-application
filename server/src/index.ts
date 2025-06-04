@@ -24,7 +24,6 @@ app.listen(process.env.PORT, async () => {
 
 dotenv.config();
 
-const app = express();
 
 const port = process.env.PORT || 3000;
 const mongoUri = process.env.MONGO_URI;
@@ -55,6 +54,6 @@ mongoose.connection.once('open', async () => {
     await seedData(true);
     //console.log('SeedData е приключено успешно');
   } catch (err) {
-    //console.error('Грешка при seedData:', err);
+    //console.error('Грешка при seedData:', err)
   }
 });
