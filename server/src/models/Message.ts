@@ -1,9 +1,10 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IMessage extends Document {
+  _id: Types.ObjectId;
   content: string;
   from: Types.ObjectId;
-  to: Types.ObjectId; // ID на Channel
+  channel: Types.ObjectId;
   timestamp: Date;
 }
 
@@ -17,7 +18,7 @@ const messageSchema = new Schema<IMessage>({
     ref: 'User',
     required: true
   },
-  to: {
+  channel: {
     type: Schema.Types.ObjectId,
     ref: 'Channel',
     required: true

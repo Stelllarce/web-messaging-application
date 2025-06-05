@@ -1,6 +1,6 @@
 import { verify } from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
-import { IAuthenticatedUserRequest, IUser } from "../interfaces/userInterface";
+import { IAuthenticatedUserRequest, IUser, IUserTokenPayload } from "../models/User";
 
 
 export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
@@ -13,7 +13,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
     }
 
     try {
-        const user = verify(token, process.env.ACCESS_TOKEN as string) as IUser;
+        const user = verify(token, process.env.ACCESS_TOKEN as string) as IUserTokenPayload;
         (req as IAuthenticatedUserRequest).user = user;
     }
     catch (err) {
