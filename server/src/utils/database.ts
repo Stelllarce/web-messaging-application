@@ -107,6 +107,9 @@ export async function seedData(force = false) {
 
 
 
+
+
+
 export const getPrivateChannelsByUserId = async (userId: string) => {
 
   if (!userId) throw new Error('User ID missing');
@@ -116,3 +119,24 @@ export const getPrivateChannelsByUserId = async (userId: string) => {
 
   return user.privateChannels;
 };
+
+export const deleteChannel = async (channelId: string) => {
+  if (!channelId) throw new Error('Channel ID missing');
+  
+  const channel = await Channel.findById(channelId);
+  if (!channel) throw new Error('Channel not found');
+
+  await Message.deleteMany({channel: channel._id});
+
+  if (channel.type === 'private') {
+        channel.users?.forEach(async (userId) => {
+            const user = await User.findById(userId);
+            if (user) {
+                user.privateChannels = user.privateChannels.filter(c => c.toString() !== channel._id.toString());
+                await user.save();
+            }
+        });
+    }
+
+  return channel;
+}

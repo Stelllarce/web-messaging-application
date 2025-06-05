@@ -1,9 +1,10 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IMessage extends Document {
+  _id: Types.ObjectId;
   content: string;
   from: Types.ObjectId;
-  channel: Types.ObjectId; // ID на Channel
+  channel: Types.ObjectId;
   timestamp: Date;
 }
 
