@@ -6,6 +6,8 @@ import cors from 'cors';
 import { connect } from "mongoose";
 import { seedData } from './utils/database';
 import { connect as connectAPI } from "./controllers/index";
+// Import socket server
+import './socket/server';
 
 dotenv.config();
 
@@ -17,7 +19,7 @@ connectAPI(app);
 
 app.listen(process.env.PORT, async () => {
     // await connect(process.env.MONGO_URI as string);
-    console.log("Server is ready on http://localhost:" + process.env.PORT);
+    console.log("API Server is ready on http://localhost:" + process.env.PORT);
 });
 
 
