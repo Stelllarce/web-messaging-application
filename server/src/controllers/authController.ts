@@ -91,14 +91,14 @@ authController.post("/register" , async (req: Request, res: Response) => {
 authController.post("/login", async (req: Request, res: Response) => {
     const user = req.body as IUser;
 
-    if (!user.username || !user.password || !user.email)
+    if (!user.username || !user.password)
     {
         res.status(400).send({error : "Missing parameters to user"});
         return;
     }
 
 
-    const foundUser = await User.findOne({email: user.email})
+    const foundUser = await User.findOne({username: user.username})
 
     if (!foundUser)
     {
@@ -149,6 +149,7 @@ authController.post("/logout", async (req: Request, res: Response) => {
     res.status(204).send({result: "Logged out"});
 })
 
+// for testing purposes
 authController.get("/user", verifyToken, async (req: Request, res: Response) => {
     const user = (req as IAuthenticatedUserRequest).user;
 
