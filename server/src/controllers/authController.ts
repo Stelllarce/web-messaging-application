@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { compareSync, hash } from "bcrypt";
 import { verify, sign } from "jsonwebtoken";
-import { IUser, IAuthenticatedUserRequest } from "../models/User";
+import { IUser, IAuthenticatedUserRequest, IUserTokenPayload } from "../models/User";
 import { IRefreshToken, IToken } from "../interfaces/tokenInterface";
 import { generateAccessToken, saveRefreshToken } from "../utils/tokens";
 import { verifyToken } from "../middlewares/verifyToken";
@@ -29,9 +29,14 @@ authController.post("/token",  async (req: Request, res: Response) => {
 
     try {
         console.log(12);
-        const user = verify(refreshToken, process.env.REFRESH_TOKEN as string) as IUser;
+        const user = verify(refreshToken, process.env.REFRESH_TOKEN as string) as IUserTokenPayload;
         console.log(user);
-        const newAccessToken = sign({username: user.username, password: user.password}, process.env.ACCESS_TOKEN as string, {
+        const userPayload: IUserTokenPayload = {
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+        };
+        const newAccessToken = sign(userPayload, process.env.ACCESS_TOKEN as string, {
             expiresIn: "15m",
         });
         res.status(200).send({ accessToken: newAccessToken });
