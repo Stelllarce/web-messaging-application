@@ -5,18 +5,43 @@ import RegisterForm from '../components/Auth/RegisterForm';
 const AuthPage: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
 
-  const handleLogin = (email: string, password: string) => {
-    console.log('Login:', email, password);
-    // Call your backend API and validate response
-    onLoginSuccess();
+  const handleLogin = async (username: string, password: string) => {
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!res.ok) throw new Error('Login failed');
+
+      const data = await res.json();
+      localStorage.setItem('accessToken', data.accessToken);
+      onLoginSuccess();
+    } catch (err) {
+      alert((err as Error).message);
+    }
   };
 
-const handleRegister = (username: string, email: string, password: string) => {
-  console.log('Registering:', { username, email, password });
-  // Call your backend API here
-  onLoginSuccess();
-};
+  const handleRegister = async (username: string, email: string, password: string) => {
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, email, password }),
+      });
 
+      if (!res.ok) throw new Error('Registration failed');
+
+      const data = await res.json();
+      localStorage.setItem('accessToken', data.accessToken);
+      onLoginSuccess();
+    } catch (err) {
+      alert((err as Error).message);
+    }
+  };
 
   return (
     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
