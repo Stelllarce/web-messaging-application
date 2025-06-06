@@ -238,7 +238,8 @@ channelController.patch('/:id/users/add', verifyToken, async (req: Request, res:
     await channel.save();
     user.privateChannels.push(channel._id);
     await user.save();
-    res.status(200).json(channel);
+    await channel.populate('users', '_id username');
+    res.status(200).json(channel.users);
 });
 
 // Remove a user from a private channel by username
@@ -285,7 +286,8 @@ channelController.patch('/:id/users/remove', verifyToken, async (req: Request, r
     user.privateChannels = user.privateChannels.filter(c => c.toString() !== channel._id.toString());
     await user.save();
 
-    res.status(200).json(channel);
+    await channel.populate('users', '_id username');
+    res.status(200).json(channel.users);
 });
 
 // Delete a channel by ID

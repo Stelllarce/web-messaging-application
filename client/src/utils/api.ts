@@ -10,7 +10,7 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     credentials: 'include',
   });
 
-  if (res.status === 401) {
+  if (res.status === 403) {
     const refreshRes = await fetch('http://localhost:3000/api/auth/token', {
       method: 'POST',
       credentials: 'include',
@@ -37,7 +37,7 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
 export const storeUserIdFromApi = async () => {
   try {
-    const res = await fetchWithAuth('http://localhost:3000/api/auth/id');
+    const res = await fetchWithAuth('http://localhost:3000/api/auth/me');
     if (!res.ok) throw new Error('Неуспешна заявка към /auth/id');
 
     const data = await res.json();

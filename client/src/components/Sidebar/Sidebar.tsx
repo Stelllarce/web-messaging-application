@@ -5,6 +5,7 @@ import { fetchWithAuth } from '../../utils/api';
 interface Channel {
   _id: string;
   name: string;
+  creator: string;
   type: 'public' | 'private';
 }
 
@@ -15,7 +16,7 @@ interface SidebarProps {
     public: () => void;
     private: () => void;
   };
-  loadChannel: (channelName: string, channelId: string) => void;
+  loadChannel: (channelName: string, channelId: string, creatorId: string, type: 'public' | 'private') => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -29,9 +30,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newName, setNewName] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
     fetchChannels();
+    fetchUsername();
   }, []);
 
    useEffect(() => {
@@ -60,6 +63,18 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
+  const fetchUsername = async () => {
+    try {
+      const res = await fetchWithAuth('http://localhost:3000/api/auth/me');
+      if (!res.ok) throw new Error('Failed to fetch user data');
+      const data = await res.json();
+      setUsername(data.username);
+    } catch (err) {
+      console.error('Failed to fetch username:', err);
+      return '';
+    }
+  }
+
   const handleCreateChannel = async () => {
     try {
       const res = await fetchWithAuth('http://localhost:3000/api/channels', {
@@ -84,6 +99,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className="sidebar">
+      <div className="user-display">👤 Logged in as: <strong>{username}</strong></div>
+
       <h2>Channels</h2>
 
       <div className="create-btn-wrapper">
@@ -99,7 +116,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {showPublic && (
           <ul className="dropdown-content">
             {publicChannels.map((channel) => (
-              <li key={channel._id} onClick={() => loadChannel(channel.name, channel._id)}>
+              <li key={channel._id} onClick={() => loadChannel(channel.name, channel._id, channel.creator, channel.type)}>
                 # {channel.name}
               </li>
             ))}
@@ -114,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {showPrivate && (
           <ul className="dropdown-content">
             {privateChannels.map((channel) => (
-              <li key={channel._id} onClick={() => loadChannel(channel.name, channel._id)}>
+              <li key={channel._id} onClick={() => loadChannel(channel.name, channel._id, channel.creator, channel.type)}>
               {channel.name}
               </li>
             ))}

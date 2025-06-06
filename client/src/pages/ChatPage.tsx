@@ -12,6 +12,8 @@ import { format } from 'date-fns';
 interface Channel {
   _id: string;
   name: string;
+  creator: string;
+  type: 'public' | 'private';
 }
 
 interface Message {
@@ -34,7 +36,7 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const [currentChannel, setCurrentChannel] = useState<Channel>({ _id: '', name: '' });
+  const [currentChannel, setCurrentChannel] = useState<Channel>({ _id: '', name: '', creator: '', type: 'public' });
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -80,9 +82,9 @@ const ChatPage: React.FC = () => {
 };
 
 
-  const loadChannel = async (channelName: string, channelId: string) => {
+  const loadChannel = async (channelName: string, channelId: string, creator: string, type: 'public' | 'private') => {
     try {
-      setCurrentChannel({_id: channelId, name: channelName});
+      setCurrentChannel({_id: channelId, name: channelName, creator: creator, type: type});
 
       const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}/messages`);
       if (!res.ok) throw new Error('Failed to load messages');
@@ -148,6 +150,8 @@ const ChatPage: React.FC = () => {
       />
       {optionsOpen && (
         <OptionsPanel
+          channelType={currentChannel.type}
+          creatorId={currentChannel.creator}
           channelId={currentChannel._id}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -157,6 +161,8 @@ const ChatPage: React.FC = () => {
             msg.text.toLowerCase().includes(confirmedQuery.toLowerCase())
           )}
           scrollToMessage={scrollToMessage}
+          setCurrentChannel={setCurrentChannel}
+
         />
       )}
 

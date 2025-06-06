@@ -161,7 +161,7 @@ authController.get("/user", verifyToken, async (req: Request, res: Response) => 
     res.status(200).send(user);
 })
 
-authController.get("/id", verifyToken, async (req: Request, res: Response) => {
+authController.get("/me", verifyToken, async (req: Request, res: Response) => {
     const user = (req as IAuthenticatedUserRequest).user;
 
     if (!user) {
@@ -169,5 +169,5 @@ authController.get("/id", verifyToken, async (req: Request, res: Response) => {
         return;
     }
 
-    res.status(200).send({id: user._id});
+    res.status(200).send({id: user._id, username: user.username});
 })

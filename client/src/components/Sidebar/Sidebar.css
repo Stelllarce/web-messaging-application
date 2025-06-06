@@ -191,3 +191,13 @@
 .close-btn:hover {
   color: #111827;
 }
+
+.user-display {
+  background-color: #EBE8FC;
+  font-size: 14px;
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 10px;
+  color: #444;
+}
+
