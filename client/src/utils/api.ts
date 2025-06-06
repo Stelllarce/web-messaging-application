@@ -10,7 +10,7 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     credentials: 'include',
   });
 
-  if (res.status === 401) {
+  if (res.status === 403) {
     const refreshRes = await fetch('http://localhost:3000/api/auth/token', {
       method: 'POST',
       credentials: 'include',
@@ -33,4 +33,20 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   }
 
   return res;
+};
+
+export const storeUserIdFromApi = async () => {
+  try {
+    const res = await fetchWithAuth('http://localhost:3000/api/auth/me');
+    if (!res.ok) throw new Error('Неуспешна заявка към /auth/id');
+
+    const data = await res.json();
+    if (!data.id) throw new Error('ID не е намерено в отговора');
+
+    localStorage.setItem('userId', data.id);
+    return data.id;
+  } catch (err) {
+    console.error('Грешка при вземане на userId:', err);
+    return null;
+  }
 };

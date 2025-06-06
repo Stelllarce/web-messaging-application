@@ -17,6 +17,11 @@ import { ChatMessage, ChannelEvent, SocketUser } from './interfaces/types';
 dotenv.config();
 
 const app = express();
+app.use((req, res, next) => {
+  console.log(`[${req.method}] ${req.url}`);
+  next();
+});
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -26,11 +31,11 @@ const io = new Server(server, {
 });
 
 // Middleware
-app.use(cors());
-// app.use(cors({
-//   origin: 'http://localhost:5173',
-//   credentials: true,
-// }));
+// app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+}));
 
 app.use(express.json());
 app.use(cookieParser());
@@ -68,20 +73,20 @@ mongoose.connect(mongoUri)
   });
 
 
-  
+
 
   app.use((req, res, next) => {
   console.log(`[${req.method}] ${req.url}`);
   next();
 });
 
-mongoose.connection.once('open', async () => {
-  try {
-    await seedData(true);
-  } catch (err) {
-    console.error('Error during seedData:', err);
-  }
-});
+// mongoose.connection.once('open', async () => {
+//   try {
+//     await seedData(true);
+//   } catch (err) {
+//     console.error('Error during seedData:', err);
+//   }
+// });
 
 // Socket authentication middleware
 const authenticateSocket = async (socket: Socket, next: Function) => {
@@ -93,7 +98,7 @@ const authenticateSocket = async (socket: Socket, next: Function) => {
 
     const decoded = verify(token, process.env.ACCESS_TOKEN as string) as IUserTokenPayload;
     const user = await User.findById(decoded._id);
-    
+
     if (!user) {
       return next(new Error('User not found'));
     }
@@ -104,7 +109,7 @@ const authenticateSocket = async (socket: Socket, next: Function) => {
       email: user.email,
       channels: []
     };
-    
+
     next();
   } catch (error) {
     next(new Error('Authentication failed'));
@@ -116,7 +121,7 @@ io.use(authenticateSocket);
 io.on('connection', async (socket: Socket) => {
   const socketUser = (socket as any).user as SocketUser;
   console.log(`New connection: ${socket.id} - ${socketUser?.username}`);
-  
+
   if (!socketUser) {
     socket.disconnect();
     return;
@@ -125,13 +130,13 @@ io.on('connection', async (socket: Socket) => {
   // Get user's channels and join socket rooms
   try {
     const publicChannels = await Channel.find({ type: 'public' });
-    const privateChannels = await Channel.find({ 
-      type: 'private', 
-      users: socketUser._id 
+    const privateChannels = await Channel.find({
+      type: 'private',
+      users: socketUser._id
     });
-    
+
     const allChannels = [...publicChannels, ...privateChannels];
-    
+
     // Join all channels the user has access to
     for (const channel of allChannels) {
       socket.join(channel._id.toString());
@@ -139,8 +144,8 @@ io.on('connection', async (socket: Socket) => {
     }
 
     // Send user identification confirmation
-    socket.emit('identified', { 
-      userId: socketUser._id, 
+    socket.emit('identified', {
+      userId: socketUser._id,
       username: socketUser.username,
       channels: allChannels.map(ch => ({
         id: ch._id.toString(),
@@ -166,7 +171,7 @@ io.on('connection', async (socket: Socket) => {
   // Handle joining a channel
   socket.on('joinChannel', async (channelId: string) => {
     if (!socketUser) return;
-    
+
     try {
       const channel = await Channel.findById(channelId);
       if (!channel) {
@@ -187,7 +192,7 @@ io.on('connection', async (socket: Socket) => {
       }
 
       socket.join(channelId);
-      
+
       if (!socketUser.channels.includes(channelId)) {
         socketUser.channels.push(channelId);
       }
@@ -223,16 +228,16 @@ io.on('connection', async (socket: Socket) => {
   // Handle leaving a channel
   socket.on('leaveChannel', async (channelId: string) => {
     if (!socketUser) return;
-    
+
     try {
       const channel = await Channel.findById(channelId);
       if (!channel) return;
 
       socket.leave(channelId);
-      
+
       // Remove channel from user's channels
       socketUser.channels = socketUser.channels.filter((c: string) => c !== channelId);
-      
+
       // For private channels, remove user from channel users
       if (channel.type === 'private') {
         channel.users = channel.users?.filter(userId => userId.toString() !== socketUser._id);
@@ -253,9 +258,9 @@ io.on('connection', async (socket: Socket) => {
   // Handle sending a message
   socket.on('sendMessage', async (data: { channel: string, content: string }) => {
     if (!socketUser) return;
-    
+
     const { channel: channelId, content } = data;
-    
+
     try {
       // Verify user has access to channel
       const channel = await Channel.findById(channelId);
@@ -303,9 +308,9 @@ io.on('connection', async (socket: Socket) => {
   // Handle creating a new channel
   socket.on('createChannel', async (data: { name: string, type: 'public' | 'private' }) => {
     if (!socketUser) return;
-    
+
     const { name, type } = data;
-    
+
     try {
       // Check if channel already exists
       const existingChannel = await Channel.findOne({ name, type });
@@ -353,9 +358,9 @@ io.on('connection', async (socket: Socket) => {
   // Handle user disconnection
   socket.on('disconnect', () => {
     if (!socketUser) return;
-    
+
     console.log(`User disconnected: ${socketUser.username}`);
-    
+
     // Notify all channels the user was in
     socketUser.channels.forEach((channelId: string) => {
       socket.to(channelId).emit('userLeft', {

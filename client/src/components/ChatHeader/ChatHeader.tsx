@@ -4,12 +4,16 @@ import './ChatHeader.css';
 interface Props {
   currentChannel: string;
   toggleOptions: () => void;
+  onLogout: () => void;
 }
 
-const ChatHeader: React.FC<Props> = ({ currentChannel, toggleOptions }) => (
+const ChatHeader: React.FC<Props> = ({ currentChannel, toggleOptions, onLogout }) => (
   <div className="chat-header">
     <h3>{currentChannel}</h3>
-    <button className="options-btn" onClick={toggleOptions}>Options</button>
+    <div className="header-buttons">
+      <button className="logout-btn" onClick={onLogout}>Logout</button>
+      <button className="options-btn" onClick={toggleOptions}>Options</button>
+    </div>
   </div>
 );
 

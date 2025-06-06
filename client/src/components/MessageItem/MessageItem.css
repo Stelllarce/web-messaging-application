@@ -1,25 +1,40 @@
 .message-item {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-    cursor: default;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: default;
+  background-color:white;
+  transition: background-color 0.3s ease;
+  will-change: background-color;
 }
 
 .message-item.clickable {
-    cursor: pointer;
-}
-
-.message-user {
-    margin: 0 0 5px 0;
+  cursor: pointer;
 }
 
 .message-content {
-    margin: 0 0 5px 0;
-}
-
-.message-timestamp {
-    color: gray;
+  margin: 0 0 5px 0;
 }
 
 .highlight-word {
-    background-color: yellow;
+  background-color: #ffff8d;
+  font-weight: bold;
+}
+
+.message-click {
+  animation: highlightFlash 5s ease-in-out forwards;
+}
+
+@keyframes highlightFlash {
+  0% {
+    background-color: inherit;
+  }
+  10% {
+    background-color: #fff59d;
+  }
+  90% {
+    background-color: #fff59d;
+  }
+  100% {
+    background-color: inherit;
+  }
 }

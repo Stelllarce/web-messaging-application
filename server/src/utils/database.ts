@@ -122,7 +122,7 @@ export const getPrivateChannelsByUserId = async (userId: string) => {
 
 export const deleteChannel = async (channelId: string) => {
   if (!channelId) throw new Error('Channel ID missing');
-  
+
   const channel = await Channel.findById(channelId);
   if (!channel) throw new Error('Channel not found');
 
@@ -137,6 +137,6 @@ export const deleteChannel = async (channelId: string) => {
             }
         });
     }
-
+  await channel.deleteOne();
   return channel;
 }

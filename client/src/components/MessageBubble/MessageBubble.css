@@ -1,33 +1,51 @@
-.message-left,
-.message-right {
+.message-container {
+  display: flex;
+  flex-direction: column;
   max-width: 60%;
   margin-bottom: 10px;
+}
+
+.message-container.left {
+  align-self: flex-start;
+  text-align: left;
+}
+
+.message-container.right {
+  align-self: flex-end;
+  text-align: right;
+}
+
+.message-sender {
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-bottom: 2px;
+  color: #555;
+}
+
+.message-bubble {
   padding: 10px;
   border-radius: 10px;
   word-wrap: break-word;
 }
 
-.message-left {
-  align-self: flex-start;
-  background: white;
+.message-bubble.left {
+  background-color: white;
 }
 
-.message-right {
-  align-self: flex-end;
-  background: #dcf8c6;
+.message-bubble.right {
+  background-color: #dcf8c6;
 }
 
-.message-click {
-  animation: flash 0.5s ease-in-out;
-  background-color: #fffa9c;
-  transition: background-color 0.5s;
+.message-timestamp {
+  font-size: 0.7rem;
+  margin-top: 2px;
+  color: #888;
 }
 
-.message-after-click {
-  background-color: transparent;
-}
-
-@keyframes flash {
-  0% { background-color: #fffa9c; }
-  100% { background-color: transparent; }
+/* 🔶 Highlight само на текста */
+.message-text.highlight-text {
+  background-color: #fff59d;
+  border-radius: 4px;
+  padding: 2px 4px;
+  transition: background-color 0.3s ease;
 }
