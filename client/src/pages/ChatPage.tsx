@@ -100,11 +100,14 @@ const ChatPage: React.FC = () => {
     const target = getTarget("message", id);
     if (target) {
       target.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      target.classList.remove("message-click");
+      void target.offsetWidth;
       target.classList.add("message-click");
+
       setTimeout(() => {
         target.classList.remove("message-click");
-        target.classList.add("message-after-click");
-      }, 3000);
+      }, 5000);
     }
   };
 
