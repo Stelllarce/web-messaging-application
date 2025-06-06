@@ -1,20 +1,12 @@
-import express from "express";
-import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
-import mongoose from 'mongoose';
-import cors from 'cors';
+import express from 'express';
 import http from 'http';
 import { Server, Socket } from 'socket.io';
 import path from 'path';
 import { verify } from 'jsonwebtoken';
-import { seedData } from './utils/database';
-import { connect as connectAPI } from "./controllers/index";
-import { User, IUser, IUserTokenPayload } from './models/User';
-import { Channel, IChannel } from './models/Channel';
-import { Message, IMessage } from './models/Message';
-import { ChatMessage, ChannelEvent, SocketUser } from './interfaces/types';
-
-dotenv.config();
+import { User, IUser, IUserTokenPayload } from '../models/User';
+import { Channel, IChannel } from '../models/Channel';
+import { Message, IMessage } from '../models/Message';
+import { ChatMessage, ChannelEvent, SocketUser } from '../interfaces/types';
 
 const app = express();
 const server = http.createServer(app);
@@ -25,63 +17,8 @@ const io = new Server(server, {
   }
 });
 
-// Middleware
-app.use(cors());
-// app.use(cors({
-//   origin: 'http://localhost:5173',
-//   credentials: true,
-// }));
-
-app.use(express.json());
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
-app.use((req, res, next) => {
-  console.log(`[${req.method}] ${req.url}`);
-  next();
-});
-
-// Connect API routes
-connectAPI(app);
-
-// app.listen(process.env.PORT, async () => {
-//     // await connect(process.env.MONGO_URI as string);
-//     console.log("Server is ready on http://localhost:" + process.env.PORT);
-// });
-
-
-
-dotenv.config();
-
-
-const mongoUri = process.env.MONGO_URI;
-
-if (!mongoUri) {
-  console.error('MONGO_URI is not set in the .env file!');
-  process.exit(1);
-}
-
-mongoose.connect(mongoUri)
-  .then(() => console.log('Connected with MongoDB'))
-  .catch((err) => {
-    console.error('Error while connecting MongoDB:', err);
-    process.exit(1);
-  });
-
-
-  
-
-  app.use((req, res, next) => {
-  console.log(`[${req.method}] ${req.url}`);
-  next();
-});
-
-mongoose.connection.once('open', async () => {
-  try {
-    await seedData(true);
-  } catch (err) {
-    console.error('Error during seedData:', err);
-  }
-});
+app.use(express.json());
 
 // Socket authentication middleware
 const authenticateSocket = async (socket: Socket, next: Function) => {
@@ -366,7 +303,7 @@ io.on('connection', async (socket: Socket) => {
   });
 });
 
-// Additional API endpoints for channels
+// API endpoints 
 app.get('/api/channels', async (req, res) => {
   try {
     const channels = await Channel.find({}, 'name type');
@@ -377,10 +314,9 @@ app.get('/api/channels', async (req, res) => {
   }
 });
 
-// Start the unified server
-const port = process.env.PORT || 3000;
-server.listen(port, () => {
-  console.log(`Server (API + Socket.IO) running on http://localhost:${port}`);
+const PORT = process.env.SOCKET_PORT || 3001;
+server.listen(PORT, () => {
+  console.log(`Socket server running on port ${PORT}`);
 });
 
 export { app, server, io };
