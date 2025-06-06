@@ -5,19 +5,30 @@
   font-size: 20px;
   display: flex;
   align-items: center;
+  justify-content: space-between; /* 👈 ново */
+  padding-right: 15px; /* 👈 за малко отстояние вдясно */
 }
 
-.options-btn {
+/* Бутоните са в общ контейнер вдясно */
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Опции бутон */
+.options-btn,
+.logout-btn {
   background: #4F46E5;
   color: white;
   border: none;
   cursor: pointer;
-  padding: 10px;
-  margin-left: auto;
+  padding: 10px 16px;
   border-radius: 20px;
   transition: background-color 0.3s ease;
+  font-size: 14px;
 }
 
-.options-btn:hover {
+.options-btn:hover,
+.logout-btn:hover {
   background: #6366F1;
 }

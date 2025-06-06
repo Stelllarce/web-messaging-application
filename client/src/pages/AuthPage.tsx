@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LoginForm from '../components/Auth/LoginForm';
 import RegisterForm from '../components/Auth/RegisterForm';
+import { storeUserIdFromApi } from '../utils/api';
 
 const AuthPage: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate(); // 👈 тук е магията
 
   const handleLogin = async (username: string, password: string) => {
     try {
@@ -18,7 +21,9 @@ const AuthPage: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) 
 
       const data = await res.json();
       localStorage.setItem('accessToken', data.accessToken);
+      await storeUserIdFromApi();
       onLoginSuccess();
+      navigate('/chat');
     } catch (err) {
       alert((err as Error).message);
     }
@@ -37,7 +42,9 @@ const AuthPage: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) 
 
       const data = await res.json();
       localStorage.setItem('accessToken', data.accessToken);
+      await storeUserIdFromApi();
       onLoginSuccess();
+      navigate('/chat');
     } catch (err) {
       alert((err as Error).message);
     }

@@ -4,8 +4,10 @@ import SearchInput from '../SearchInput';
 import MessageBox from '../MessageBox';
 
 interface Message {
-  id: number;
+  id: string;
+  from: string;
   text: string;
+  timestamp: string;
   side: 'left' | 'right';
 }
 
@@ -15,7 +17,7 @@ interface OptionsPanelProps {
   confirmedQuery: string;
   setConfirmedQuery: (val: string) => void;
   filteredMessages: Message[];
-  scrollToMessage: (id: number) => void;
+  scrollToMessage: (id: string) => void;
 }
 
 const OptionsPanel: React.FC<OptionsPanelProps> = ({ searchQuery, setSearchQuery, confirmedQuery, setConfirmedQuery, filteredMessages, scrollToMessage }) => (

@@ -1,134 +1,139 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../utils/logout';
 import Sidebar from '../components/Sidebar/Sidebar';
 import Chat from '../components/Chat/Chat';
 import OptionsPanel from '../components/OptionsPanel/OptionsPanel';
-import Modal from '../components/Modal/Modal';
 import { useRefManager } from '../components/RefMessagesManager';
+import { fetchWithAuth } from '../utils/api';
+import { format } from 'date-fns';
+
+
+interface Channel {
+  _id: string;
+  name: string;
+}
 
 interface Message {
-  id: number;
+  id: string;
+  from: string;
   text: string;
+  timestamp: string;
   side: 'left' | 'right';
 }
 
-const allUsers = ['Dimi', 'Andrei', 'Denis', 'Eli', 'Valya'];
-type CreatingType = 'people' | 'group';
-
 const ChatPage: React.FC = () => {
-  const [currentChannel, setCurrentChannel] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/auth');
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+  };
+
+  const [currentChannel, setCurrentChannel] = useState<Channel>({ _id: '', name: '' });
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const [userModalOpen, setUserModalOpen] = useState(false);
-  const [creatingType, setCreatingType] = useState<CreatingType>('people');
-  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
-  const [groupName, setGroupName] = useState('');
 
   const [showPublic, setShowPublic] = useState(false);
   const [showPrivate, setShowPrivate] = useState(false);
-  const [showGroups, setShowGroups] = useState(false);
-  const [showPeople, setShowPeople] = useState(false);
-
-  const [privatePeopleChats, setPrivatePeopleChats] = useState<string[]>([]);
-  const [privateGroupChats, setPrivateGroupChats] = useState<string[]>([]);
-
-  const handleSend = () => {
-    if (input.trim()) {
-      const side = Math.random() > 0.5 ? 'left' : 'right';
-      setMessages([...messages, { id: Date.now(), text: input.trim(), side }]);
-      setInput('');
-    }
-  };
-
-  const toggleUserSelection = (user: string) => {
-    const newSet = new Set(selectedUsers);
-    newSet.has(user) ? newSet.delete(user) : newSet.add(user);
-    setSelectedUsers(newSet);
-  };
-
-  const confirmUsers = () => {
-    const selected = Array.from(selectedUsers);
-    if (creatingType === 'people' && selected.length !== 1) {
-      alert('You can only select one user for private chat!');
-      return;
-    }
-    if (creatingType === 'group' && selected.length < 2) {
-      alert('You need to select at least two users for a group chat!');
-      return;
-    }
-
-    const name = creatingType === 'group' ? groupName || selected.join(', ') : selected[0];
-
-    if (creatingType === 'people') {
-      if (privatePeopleChats.includes(name)) {
-        alert('Chat already exists with this user.');
-        return;
-      }
-      setPrivatePeopleChats([...privatePeopleChats, name]);
-    } else {
-      if (privateGroupChats.includes(name)) {
-        alert('Group chat already exists with this name.');
-        return;
-      }
-      setPrivateGroupChats([...privateGroupChats, name]);
-    }
-
-    setCurrentChannel(name);
-    setMessages([]);
-    setUserModalOpen(false);
-    setSelectedUsers(new Set());
-    setGroupName('');
-  };
-
-  const loadChannel = (name: string) => {
-    setCurrentChannel(name);
-    setMessages(name === 'General' ? [
-      { id: 0, text: 'zdr', side: 'left' },
-      { id: 1, text: 'kp', side: 'right' },
-      { id: 2, text: 'wezdrb', side: 'left' },
-      { id: 3, text: 'web', side: 'left' },
-      { id: 4, text: 'zdr hey', side: 'right' },
-      { id: 5, text: 'webzdr', side: 'right' },
-    ] : []);
-  };
 
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmedQuery, setConfirmedQuery] = useState('');
   const { getTarget } = useRefManager();
 
-  const scrollToMessage = (id: number) => {
-    const target = getTarget("message", id);
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
+  const handleSend = async (channelId: string) => {
+  if (!input.trim() || !channelId) return;
 
-      target.classList.remove("message-click");
-      void target.offsetWidth;
-      target.classList.add("message-click");
+  try {
+    const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: input.trim() }),
+    });
 
-      setTimeout(() => {
-        target.classList.remove("message-click");
-      }, 5000);
+    if (!res.ok) throw new Error('Неуспешно изпращане на съобщението');
+
+    const newMsg = await res.json();
+    console.log('Новото съобщение:', newMsg);
+    const currentUserId = localStorage.getItem('userId') || '';
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: newMsg._id,
+        from: newMsg.from._id === currentUserId ? "You" : newMsg.sender.username,
+        text: newMsg.content,
+        side: newMsg.from._id === currentUserId ? 'right' : 'left',
+        timestamp: format(newMsg.timestamp, 'dd.MM.yyyy HH:mm')
+      },
+    ]);
+    scrollToMessage(newMsg._id);
+    setInput('');
+  } catch (err) {
+    console.error('Грешка при изпращане:', err);
+  }
+};
+
+
+  const loadChannel = async (channelName: string, channelId: string) => {
+    try {
+      setCurrentChannel({_id: channelId, name: channelName});
+
+      const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}/messages`);
+      if (!res.ok) throw new Error('Failed to load messages');
+
+      const data = await res.json();
+      const currentUserId = localStorage.getItem('userId') || '';
+
+      const formattedMessages = data.map((msg: any) => ({
+        id: msg._id,
+        from: msg.from._id === currentUserId ? "You" : msg.from.username,
+        text: msg.content,
+        side: msg.from._id === currentUserId ? 'right' : 'left',
+        timestamp: format(msg.timestamp, 'dd.MM.yyyy HH:mm')
+      }));
+
+      setMessages(formattedMessages);
+    } catch (err) {
+      console.error('Грешка при зареждане на съобщенията:', err);
+      setMessages([]);
     }
-  };
+};
+
+
+  const scrollToMessage = (id: string) => {
+  const target = getTarget("message", id);
+  if (target) {
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    const textElement = target.querySelector('.message-text') as HTMLElement;
+    if (!textElement) return;
+
+    textElement.classList.remove("highlight-text");
+    void textElement.offsetWidth; // trigger reflow for re-adding
+    textElement.classList.add("highlight-text");
+
+    setTimeout(() => {
+      textElement.classList.remove("highlight-text");
+    }, 5000);
+  }
+};
+
+
 
   return (
     <div className={`container ${optionsOpen ? 'options-open' : ''}`}>
       <Sidebar
         showPublic={showPublic}
         showPrivate={showPrivate}
-        showGroups={showGroups}
-        showPeople={showPeople}
         toggle={{
           public: () => setShowPublic(p => !p),
           private: () => setShowPrivate(p => !p),
-          groups: () => setShowGroups(p => !p),
-          people: () => setShowPeople(p => !p),
-        }}
-        privateGroupChats={privateGroupChats}
-        privatePeopleChats={privatePeopleChats}
-        openModal={(type) => {
-          setCreatingType(type);
-          setUserModalOpen(true);
         }}
         loadChannel={loadChannel}
       />
@@ -139,6 +144,7 @@ const ChatPage: React.FC = () => {
         setInput={setInput}
         handleSend={handleSend}
         toggleOptions={() => setOptionsOpen(p => !p)}
+        onLogout={handleLogout}
       />
       {optionsOpen && (
         <OptionsPanel
@@ -152,18 +158,7 @@ const ChatPage: React.FC = () => {
           scrollToMessage={scrollToMessage}
         />
       )}
-      {userModalOpen && (
-        <Modal
-          creatingType={creatingType}
-          groupName={groupName}
-          setGroupName={setGroupName}
-          allUsers={allUsers}
-          selectedUsers={selectedUsers}
-          toggleUserSelection={toggleUserSelection}
-          confirmUsers={confirmUsers}
-          closeModal={() => setUserModalOpen(false)}
-        />
-      )}
+
     </div>
   );
 };

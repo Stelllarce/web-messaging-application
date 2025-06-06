@@ -15,6 +15,11 @@ app.use(cors({
   credentials: true,
 }));
 
+app.use((req, res, next) => {
+  console.log(`[${req.method}] ${req.url}`);
+  next();
+});
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -45,19 +50,16 @@ mongoose.connect(mongoUri)
   });
 
 
-  
 
-  app.use((req, res, next) => {
-  console.log(`[${req.method}] ${req.url}`);
-  next();
-});
 
-mongoose.connection.once('open', async () => {
-  //console.log('Стартиране на seedData...');
-  try {
-    await seedData(true);
-    //console.log('SeedData е приключено успешно');
-  } catch (err) {
-    //console.error('Грешка при seedData:', err)
-  }
-});
+
+
+// mongoose.connection.once('open', async () => {
+//   //console.log('Стартиране на seedData...');
+//   try {
+//     await seedData(true);
+//     //console.log('SeedData е приключено успешно');
+//   } catch (err) {
+//     //console.error('Грешка при seedData:', err)
+//   }
+// });

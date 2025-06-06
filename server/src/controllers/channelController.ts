@@ -46,8 +46,26 @@ channelController.get('/:id/messages', verifyToken, async (req: Request, res: Re
         res.status(404).json({ message: 'Channel not found' });
         return;
     }
+    if (channel.type === 'private') {
+        const userId = (req as IAuthenticatedUserRequest).user._id;
+        const user = await User.findById(userId);
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+        if (!channel.users?.includes(user._id)) {
+            res.status(403).json({ message: 'You are not part of this private channel' });
+            return;
+        }
+    }
 
-    await channel.populate('messages');
+    await channel.populate({
+        path: 'messages',
+        populate: {
+            path: 'from',
+            select: 'username'
+  },
+});
 
     res.status(200).json(channel.messages);
 });
@@ -84,7 +102,7 @@ channelController.post('/', verifyToken, async (req: Request, res: Response) => 
         res.status(400).json({ message: 'Type must be either public or private' });
         return;
     }
-    
+
     const userId = (req as IAuthenticatedUserRequest).user._id;
 
     let channel;
@@ -147,7 +165,7 @@ channelController.post('/:id/messages', verifyToken, async (req: Request, res: R
     await message.save();
     channel.messages.push(message._id);
     await channel.save();
-
+    await message.populate('from', 'username');
     res.status(201).json(message);
 });
 
@@ -210,7 +228,7 @@ channelController.patch('/:id/users/add', verifyToken, async (req: Request, res:
         res.status(403).json({ message: 'Only the creator can add users to the channel' });
         return;
     }
-    
+
     if (channel.users?.includes(user._id)) {
         res.status(400).json({ message: 'User is already part of this channel' });
         return;

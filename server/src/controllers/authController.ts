@@ -42,9 +42,9 @@ authController.post("/token",  async (req: Request, res: Response) => {
         res.status(403).send({ error: "Token expired" });
         return;
     }
-    
 
-});    
+
+});
 
 authController.post("/register" , async (req: Request, res: Response) => {
 
@@ -65,7 +65,7 @@ authController.post("/register" , async (req: Request, res: Response) => {
         res.status(400).send({error : "User with this username already exists"});
         return;
     }
-    
+
     const password = await hash(newUser.password, 10);
 
     const createdUser = new User({
@@ -112,12 +112,12 @@ authController.post("/login", async (req: Request, res: Response) => {
         return;
     }
 
-    
+
     user.password = foundUser.password;
     const tokens: IToken = generateAccessToken(foundUser)
 
     await saveRefreshToken(tokens as IRefreshToken)
-    
+
     res.cookie('refreshToken', tokens.refreshToken, {
         httpOnly: true,
         secure: true,
@@ -159,4 +159,15 @@ authController.get("/user", verifyToken, async (req: Request, res: Response) => 
     }
 
     res.status(200).send(user);
+})
+
+authController.get("/id", verifyToken, async (req: Request, res: Response) => {
+    const user = (req as IAuthenticatedUserRequest).user;
+
+    if (!user) {
+        res.status(401).send({error : "No user found"});
+        return;
+    }
+
+    res.status(200).send({id: user._id});
 })
