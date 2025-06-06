@@ -148,6 +148,7 @@ const ChatPage: React.FC = () => {
       />
       {optionsOpen && (
         <OptionsPanel
+          channelId={currentChannel._id}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           confirmedQuery={confirmedQuery}

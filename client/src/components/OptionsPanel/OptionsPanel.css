@@ -34,3 +34,26 @@
   background: #6366F1;
   color: white;
 }
+
+.channel-users {
+  margin-top: 20px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+}
+
+.channel-users h4 {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.channel-users ul {
+  padding-left: 20px;
+  font-size: 20px;
+  color: #555;
+  list-style-type: disc;
+}
+
+.channel-users li {
+  margin-bottom: 4px;
+}

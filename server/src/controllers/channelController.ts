@@ -41,11 +41,11 @@ channelController.get('/', verifyToken, async (req: Request, res: Response) => {
 channelController.get('/:id/messages', verifyToken, async (req: Request, res: Response) => {
     const { id } = req.params;
     const channel = await Channel.findById(id);
-
     if (!channel) {
         res.status(404).json({ message: 'Channel not found' });
         return;
     }
+
     if (channel.type === 'private') {
         const userId = (req as IAuthenticatedUserRequest).user._id;
         const user = await User.findById(userId);
@@ -71,7 +71,7 @@ channelController.get('/:id/messages', verifyToken, async (req: Request, res: Re
 });
 
 // Get users of a specific channel by ID
-channelController.get('/:id/users ', verifyToken, async (req: Request, res: Response) => {
+channelController.get('/:id/users', verifyToken, async (req: Request, res: Response) => {
     const { id } = req.params;
     const channel = await Channel.findById(id);
     if (!channel) {
