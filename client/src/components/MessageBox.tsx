@@ -7,7 +7,7 @@ interface Message {
   from: string;
   text: string;
   timestamp: string;
-  side: 'left' | 'right';
+  side: 'left' | 'right' | 'system';
 }
 type MessageBoxProps = {
   id: string;

@@ -31,6 +31,8 @@ export class ChatClient {
   private identifiedCallbacks: ((response: IdentifiedResponse) => void)[] = [];
   private channelMessagesCallbacks: ((data: { channel: string; messages: ChatMessage[] }) => void)[] = [];
   private errorCallbacks: ((error: string) => void)[] = [];
+  private onlineNotificationCallbacks: ((message: { sender: string; content: string; timestamp: Date }) => void)[] = [];
+  private offlineNotificationCallbacks: ((message: { sender: string; content: string; timestamp: Date }) => void)[] = [];
   
 
   constructor(url?: string, token?: string) {
@@ -93,6 +95,24 @@ export class ChatClient {
         this.channels.push(channel);
       }
       this.channelAddedCallbacks.forEach(callback => callback(channel));
+    });
+    
+    // Handle online notifications
+    this.socket.on('userOnlineNotification', (message: { sender: string; content: string; timestamp: Date }) => {
+      // Convert timestamp string to Date object if needed
+      if (typeof message.timestamp === 'string') {
+        message.timestamp = new Date(message.timestamp);
+      }
+      this.onlineNotificationCallbacks.forEach(callback => callback(message));
+    });
+    
+    // Handle offline notifications
+    this.socket.on('userOfflineNotification', (message: { sender: string; content: string; timestamp: Date }) => {
+      // Convert timestamp string to Date object if needed
+      if (typeof message.timestamp === 'string') {
+        message.timestamp = new Date(message.timestamp);
+      }
+      this.offlineNotificationCallbacks.forEach(callback => callback(message));
     });
     
     this.socket.on('error', (error: string) => {
@@ -194,6 +214,14 @@ export class ChatClient {
   
   onError(callback: (error: string) => void): void {
     this.errorCallbacks.push(callback);
+  }
+  
+  onOnlineNotification(callback: (message: { sender: string; content: string; timestamp: Date }) => void): void {
+    this.onlineNotificationCallbacks.push(callback);
+  }
+  
+  onOfflineNotification(callback: (message: { sender: string; content: string; timestamp: Date }) => void): void {
+    this.offlineNotificationCallbacks.push(callback);
   }
   
   disconnect(): void {

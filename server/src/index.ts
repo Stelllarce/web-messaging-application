@@ -163,12 +163,21 @@ io.on('connection', async (socket: Socket) => {
       }))
     });
 
-    // Notify others in channels that user is online
-    for (const channel of allChannels) {
-      socket.to(channel._id.toString()).emit('userJoined', {
-        channel: channel._id.toString(),
-        username: socketUser.username
-      } as ChannelEvent);
+    if (allChannels.length > 0) {
+      const onlineMessage = {
+        sender: 'System',
+        content: `${socketUser.username} is now online`,
+        timestamp: new Date()
+      };
+
+      for (const channel of allChannels) {
+        socket.to(channel._id.toString()).emit('userJoined', {
+          channel: channel._id.toString(),
+          username: socketUser.username
+        } as ChannelEvent);
+      }
+
+      socket.broadcast.emit('userOnlineNotification', onlineMessage);
     }
 
   } catch (error) {
@@ -373,13 +382,22 @@ io.on('connection', async (socket: Socket) => {
     // Remove user-socket mapping
     removeUserSocket(socketUser._id);
 
-    // Notify all channels the user was in
+    // Notify channels the user was in
     socketUser.channels.forEach((channelId: string) => {
       socket.to(channelId).emit('userLeft', {
         channel: channelId,
         username: socketUser.username
       } as ChannelEvent);
     });
+
+    // Send offline notification globally to all connected users
+    const offlineMessage = {
+      sender: 'System',
+      content: `${socketUser.username} is now offline`,
+      timestamp: new Date()
+    };
+
+    socket.broadcast.emit('userOfflineNotification', offlineMessage);
   });
 });
 

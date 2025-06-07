@@ -22,13 +22,12 @@ interface Message {
   from: string;
   text: string;
   timestamp: string;
-  side: 'left' | 'right';
+  side: 'left' | 'right' | 'system';
 }
 
 const ChatPage: React.FC = () => {
   const navigate = useNavigate();
   const chatClientRef = useRef<ChatClient | null>(null);
-  const sidebarRef = useRef<any>(null);
 
   const [currentChannel, setCurrentChannel] = useState<Channel>({ _id: '', name: '', creator: '', type: 'public' });
   const [input, setInput] = useState('');
@@ -65,11 +64,26 @@ const ChatPage: React.FC = () => {
     if (!chatClientRef.current) return;
 
     chatClientRef.current.onMessage((message) => {
+      const isSystemMessage = message.sender === 'System';
+      let from: string;
+      let side: 'left' | 'right' | 'system';
+      
+      if (isSystemMessage) {
+        from = "System";
+        side = 'system';
+      } else if (message.sender === chatClientRef.current?.getUsername()) {
+        from = "You";
+        side = 'right';
+      } else {
+        from = message.sender;
+        side = 'left';
+      }
+      
       const newMessage = {
         id: `${Date.now()}-${Math.random()}`,
-        from: message.sender === chatClientRef.current?.getUsername() ? "You" : message.sender,
+        from,
         text: message.content,
-        side: message.sender === chatClientRef.current?.getUsername() ? 'right' as const : 'left' as const,
+        side,
         timestamp: format(new Date(message.timestamp), 'dd.MM.yyyy HH:mm')
       };
 
@@ -87,6 +101,29 @@ const ChatPage: React.FC = () => {
 
     chatClientRef.current.onError((error) => {
       console.error('Socket error:', error);
+    });
+
+    // Handle online/offline notifications
+    chatClientRef.current.onOnlineNotification((notification) => {
+      const systemMessage = {
+        id: `${Date.now()}-${Math.random()}`,
+        from: "System",
+        text: notification.content,
+        side: 'system' as const,
+        timestamp: format(new Date(notification.timestamp), 'dd.MM.yyyy HH:mm')
+      };
+      setMessages(prev => [...prev, systemMessage]);
+    });
+
+    chatClientRef.current.onOfflineNotification((notification) => {
+      const systemMessage = {
+        id: `${Date.now()}-${Math.random()}`,
+        from: "System",
+        text: notification.content,
+        side: 'system' as const,
+        timestamp: format(new Date(notification.timestamp), 'dd.MM.yyyy HH:mm')
+      };
+      setMessages(prev => [...prev, systemMessage]);
     });
   };
 
