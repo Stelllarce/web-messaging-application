@@ -1,4 +1,3 @@
-// MessageBox.tsx
 import React, { useEffect, useRef } from "react";
 import { useRefManager } from "./RefMessagesManager";
 import MessageItem from "./MessageItem/MessageItem";

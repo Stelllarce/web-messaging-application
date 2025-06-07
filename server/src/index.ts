@@ -48,12 +48,14 @@ app.use((req, res, next) => {
 // Connect API routes
 connectAPI(app);
 
-// app.listen(process.env.PORT, async () => {
-//     // await connect(process.env.MONGO_URI as string);
-//     console.log("Server is ready on http://localhost:" + process.env.PORT);
-// });
-
-
+// Health check endpoint for CI/CD
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    service: 'web-messaging-app-server'
+  });
+});
 
 dotenv.config();
 
@@ -385,6 +387,7 @@ app.get('/api/channels', async (req, res) => {
 // Start the unified server
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
+  // await connect(process.env.MONGO_URI as string);
   console.log(`Server (API + Socket.IO) running on http://localhost:${port}`);
 });
 
