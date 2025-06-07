@@ -27,6 +27,7 @@ export class ChatClient {
   private userLeftCallbacks: ((event: ChannelEvent) => void)[] = [];
   private channelListCallbacks: ((channels: ChannelInfo[]) => void)[] = [];
   private channelCreatedCallbacks: ((channel: ChannelInfo) => void)[] = [];
+  private channelAddedCallbacks: ((channel: ChannelInfo) => void)[] = [];
   private identifiedCallbacks: ((response: IdentifiedResponse) => void)[] = [];
   private channelMessagesCallbacks: ((data: { channel: string; messages: ChatMessage[] }) => void)[] = [];
   private errorCallbacks: ((error: string) => void)[] = [];
@@ -34,7 +35,7 @@ export class ChatClient {
 
   constructor(url?: string, token?: string) {
     // Initialize socket with authentication token
-    this.socket = io(url || 'http://localhost:3001', {
+    this.socket = io(url ?? 'http://localhost:3001', {
       auth: {
         token: token
       }
@@ -85,12 +86,19 @@ export class ChatClient {
       this.channelCreatedCallbacks.forEach(callback => callback(channel));
     });
     
-    // Handle errors
+    // Handle being added to a channel
+    this.socket.on('channelAdded', (channel: ChannelInfo) => {
+      const existingChannel = this.channels.find(c => c.id === channel.id);
+      if (!existingChannel) {
+        this.channels.push(channel);
+      }
+      this.channelAddedCallbacks.forEach(callback => callback(channel));
+    });
+    
     this.socket.on('error', (error: string) => {
       this.errorCallbacks.forEach(callback => callback(error));
     });
     
-    // Handle connection errors
     this.socket.on('connect_error', (error: Error) => {
       this.errorCallbacks.forEach(callback => callback(error.message));
     });
@@ -170,6 +178,10 @@ export class ChatClient {
 
   onChannelCreated(callback: (channel: ChannelInfo) => void): void {
     this.channelCreatedCallbacks.push(callback);
+  }
+
+  onChannelAdded(callback: (channel: ChannelInfo) => void): void {
+    this.channelAddedCallbacks.push(callback);
   }
 
   onIdentified(callback: (response: IdentifiedResponse) => void): void {

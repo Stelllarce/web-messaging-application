@@ -35,6 +35,7 @@ interface OptionsPanelProps {
   setCurrentChannel?: (val: Channel) => void;
   creatorId: string;
   channelType: 'public' | 'private';
+  onUserAdded?: () => void;
 }
 
 const OptionsPanel: React.FC<OptionsPanelProps> = ({
@@ -47,7 +48,8 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
   scrollToMessage,
   setCurrentChannel,
   creatorId,
-  channelType
+  channelType,
+  onUserAdded
 }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [showRenameModal, setShowRenameModal] = useState(false);
@@ -104,6 +106,10 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
       setUsers(updatedUsers);
       setShowAddUserModal(false);
       setNewUsername('');
+      
+      if (onUserAdded) {
+        onUserAdded();
+      }
     } catch (err) {
       console.error('Add user error:', err);
     }

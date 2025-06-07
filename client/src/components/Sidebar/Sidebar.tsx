@@ -17,13 +17,15 @@ interface SidebarProps {
     private: () => void;
   };
   loadChannel: (channelName: string, channelId: string, creatorId: string, type: 'public' | 'private') => void;
+  refreshTrigger?: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
     showPublic,
     showPrivate,
     toggle,
-    loadChannel
+    loadChannel,
+    refreshTrigger
   }) => {
   const [publicChannels, setPublicChannels] = useState<Channel[]>([]);
   const [privateChannels, setPrivateChannels] = useState<Channel[]>([]);
@@ -36,6 +38,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     fetchChannels();
     fetchUsername();
   }, []);
+
+  useEffect(() => {
+    if (refreshTrigger && refreshTrigger > 0) {
+      fetchChannels();
+    }
+  }, [refreshTrigger]);
 
    useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {

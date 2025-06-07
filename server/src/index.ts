@@ -13,6 +13,7 @@ import { User, IUser, IUserTokenPayload } from './models/User';
 import { Channel, IChannel } from './models/Channel';
 import { Message, IMessage } from './models/Message';
 import { ChatMessage, ChannelEvent, SocketUser } from './interfaces/types';
+import { setSocketIO, addUserSocket, removeUserSocket } from './socket/socketManager';
 
 dotenv.config();
 
@@ -120,6 +121,9 @@ const authenticateSocket = async (socket: Socket, next: Function) => {
 
 io.use(authenticateSocket);
 
+// Initialize socket manager
+setSocketIO(io);
+
 io.on('connection', async (socket: Socket) => {
   const socketUser = (socket as any).user as SocketUser;
   console.log(`New connection: ${socket.id} - ${socketUser?.username}`);
@@ -128,6 +132,9 @@ io.on('connection', async (socket: Socket) => {
     socket.disconnect();
     return;
   }
+
+  // Track user-socket mapping
+  addUserSocket(socketUser._id, socket.id);
 
   // Get user's channels and join socket rooms
   try {
@@ -362,6 +369,9 @@ io.on('connection', async (socket: Socket) => {
     if (!socketUser) return;
 
     console.log(`User disconnected: ${socketUser.username}`);
+
+    // Remove user-socket mapping
+    removeUserSocket(socketUser._id);
 
     // Notify all channels the user was in
     socketUser.channels.forEach((channelId: string) => {

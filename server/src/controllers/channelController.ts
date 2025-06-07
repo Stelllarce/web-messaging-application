@@ -5,6 +5,7 @@ import { Message } from "../models/Message";
 import { verifyToken } from "../middlewares/verifyToken";
 import { IUser, IAuthenticatedUserRequest } from "../models/User";
 import { deleteChannel, getPrivateChannelsByUserId } from "../utils/database";
+import { emitToUser, getSocketIO } from "../socket/socketManager";
 
 export const channelController = Router();
 
@@ -238,6 +239,28 @@ channelController.patch('/:id/users/add', verifyToken, async (req: Request, res:
     await channel.save();
     user.privateChannels.push(channel._id);
     await user.save();
+    
+    // Emit websocket event to notify the added user about the new channel
+    emitToUser(user._id.toString(), 'channelAdded', {
+        id: channel._id.toString(),
+        name: channel.name,
+        type: channel.type,
+        creator: channel.creator
+    });
+
+    // Also join the user to the channel socket room
+    const io = getSocketIO();
+    if (io) {
+        // Find all sockets for this user and join them to the channel
+        const sockets = await io.fetchSockets();
+        const userSocket = sockets.find(socket => 
+            (socket as any).user && (socket as any).user._id === user._id.toString()
+        );
+        if (userSocket) {
+            userSocket.join(channel._id.toString());
+        }
+    }
+    
     await channel.populate('users', '_id username');
     res.status(200).json(channel.users);
 });

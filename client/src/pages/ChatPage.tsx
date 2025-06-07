@@ -28,6 +28,7 @@ interface Message {
 const ChatPage: React.FC = () => {
   const navigate = useNavigate();
   const chatClientRef = useRef<ChatClient | null>(null);
+  const sidebarRef = useRef<any>(null);
 
   const [currentChannel, setCurrentChannel] = useState<Channel>({ _id: '', name: '', creator: '', type: 'public' });
   const [input, setInput] = useState('');
@@ -39,6 +40,7 @@ const ChatPage: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmedQuery, setConfirmedQuery] = useState('');
+  const [refreshSidebarTrigger, setRefreshSidebarTrigger] = useState(0);
   const { getTarget } = useRefManager();
 
   useEffect(() => {
@@ -74,9 +76,13 @@ const ChatPage: React.FC = () => {
       setMessages(prev => [...prev, newMessage]);
     });
 
-    // Handle successful connection and authentication
     chatClientRef.current.onIdentified((response) => {
       console.log(`Connected as: ${response.username}`);
+    });
+
+    chatClientRef.current.onChannelAdded((channel) => {
+      console.log(`Added to new channel: ${channel.name}`);
+      setRefreshSidebarTrigger(prev => prev + 1);
     });
 
     chatClientRef.current.onError((error) => {
@@ -190,6 +196,7 @@ const ChatPage: React.FC = () => {
           private: () => setShowPrivate(p => !p),
         }}
         loadChannel={loadChannel}
+        refreshTrigger={refreshSidebarTrigger}
       />
       <Chat
         currentChannel={currentChannel}
@@ -214,7 +221,7 @@ const ChatPage: React.FC = () => {
           )}
           scrollToMessage={scrollToMessage}
           setCurrentChannel={setCurrentChannel}
-
+          onUserAdded={() => setRefreshSidebarTrigger(prev => prev + 1)}
         />
       )}
 
