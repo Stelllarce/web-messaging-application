@@ -8,6 +8,7 @@ import { useRefManager } from '../components/RefMessagesManager';
 import { fetchWithAuth } from '../utils/api';
 import { format } from 'date-fns';
 import { ChatClient } from '../../websockets/chat-client';
+import config from '../config';
 
 
 interface Channel {
@@ -46,7 +47,7 @@ const ChatPage: React.FC = () => {
     const initializeSocketClient = () => {
       const token = localStorage.getItem('accessToken');
       if (token) {
-        chatClientRef.current = new ChatClient('http://localhost:3000', token);
+        chatClientRef.current = new ChatClient(config.SERVER_URL, token);
         setupSocketListeners();
       }
     };
@@ -168,7 +169,7 @@ const ChatPage: React.FC = () => {
         setInput('');
       } else {
         // Fallback to HTTP if socket not available
-        const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}/messages`, {
+        const res = await fetchWithAuth(`${config.API_BASE_URL}/channels/${channelId}/messages`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: input.trim() }),
@@ -204,7 +205,7 @@ const ChatPage: React.FC = () => {
         chatClientRef.current.joinChannel(channelId);
       }
 
-      const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}/messages`);
+      const res = await fetchWithAuth(`${config.API_BASE_URL}/channels/${channelId}/messages`);
       if (!res.ok) throw new Error('Failed to load messages');
 
       const data = await res.json();
@@ -220,7 +221,7 @@ const ChatPage: React.FC = () => {
 
       setMessages(formattedMessages);
     } catch (err) {
-      console.error('Грешка при зареждане на съобщенията:', err);
+      console.error('Failed to fetch messages:', err);
       setMessages([]);
     }
   };

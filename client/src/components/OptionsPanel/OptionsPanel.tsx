@@ -3,6 +3,9 @@ import './OptionsPanel.css';
 import SearchInput from '../SearchInput';
 import MessageBox from '../MessageBox';
 import { fetchWithAuth } from '../../utils/api';
+import config from '../../config';
+
+const API_BASE_URL = config.API_BASE_URL;
 
 interface Message {
   id: string;
@@ -61,12 +64,12 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userRes = await fetchWithAuth('http://localhost:3000/api/auth/me');
+        const userRes = await fetchWithAuth(`${API_BASE_URL}/auth/me`);
         const userData = await userRes.json();
         setCurrentUserId(userData.id);
 
-        const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}/users`);
-        if (!res.ok) throw new Error('Грешка при зареждане на потребителите');
+        const res = await fetchWithAuth(`${API_BASE_URL}/channels/${channelId}/users`);
+        if (!res.ok) throw new Error('Error fetching users');
         const data = await res.json();
         setUsers(data);
       } catch (err) {
@@ -79,7 +82,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
 
   const handleRename = async () => {
     try {
-      const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}`, {
+      const res = await fetchWithAuth(`${API_BASE_URL}/channels/${channelId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newName })
@@ -96,7 +99,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
 
   const handleAddUser = async () => {
     try {
-      const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}/users/add`, {
+      const res = await fetchWithAuth(`${API_BASE_URL}/channels/${channelId}/users/add`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: newUsername })
@@ -117,7 +120,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
 
   const handleRemoveUser = async (username: string) => {
     try {
-      const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}/users/remove`, {
+      const res = await fetchWithAuth(`${API_BASE_URL}/channels/${channelId}/users/remove`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username })
@@ -132,7 +135,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
 
   const handleLeaveChat = async () => {
     try {
-      const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}/leave`, {
+      const res = await fetchWithAuth(`${API_BASE_URL}/channels/${channelId}/leave`, {
         method: 'PATCH'
       });
       if (!res.ok) throw new Error('Failed to leave chat');
@@ -144,7 +147,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
 
   const handleDeleteChannel = async () => {
     try {
-      const res = await fetchWithAuth(`http://localhost:3000/api/channels/${channelId}`, {
+      const res = await fetchWithAuth(`${API_BASE_URL}/channels/${channelId}`, {
         method: 'DELETE'
       });
       if (!res.ok) throw new Error('Failed to delete channel');
@@ -181,9 +184,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({
         )}
 
         {channelType === 'private' && isCreator && (
-          <>
-            <button onClick={() => setShowAddUserModal(true)}>Add person</button>
-          </>
+          <button onClick={() => setShowAddUserModal(true)}>Add person</button>
         )}
 
         {channelType === 'private' && !isCreator && (

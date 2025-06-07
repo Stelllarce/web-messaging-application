@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import LoginForm from '../components/Auth/LoginForm';
 import RegisterForm from '../components/Auth/RegisterForm';
 import { storeUserIdFromApi } from '../utils/api';
+import config from '../config';
 
 const AuthPage: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,7 +11,7 @@ const AuthPage: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) 
 
   const handleLogin = async (username: string, password: string) => {
     try {
-      const res = await fetch('http://localhost:3000/api/auth/login', {
+      const res = await fetch(`${config.API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -31,7 +32,7 @@ const AuthPage: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) 
 
   const handleRegister = async (username: string, email: string, password: string) => {
     try {
-      const res = await fetch('http://localhost:3000/api/auth/register', {
+      const res = await fetch(`${config.API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

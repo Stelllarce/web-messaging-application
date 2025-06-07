@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import config from '../src/config';
 import { ChatMessage, ChannelEvent } from '../../server/src/interfaces/types';
 
 // Define interfaces for client-side types
@@ -39,7 +40,7 @@ export class ChatClient {
 
   constructor(url?: string, token?: string) {
     // Initialize socket with authentication token
-    this.socket = io(url ?? 'http://localhost:3001', {
+    this.socket = io(url ?? config.WS_URL, {
       auth: {
         token: token
       }

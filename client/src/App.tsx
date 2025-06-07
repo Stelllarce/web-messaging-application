@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ChatPage from './pages/ChatPage';
 import AuthPage from './pages/AuthPage';
+import config from './config';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -18,7 +19,7 @@ const App: React.FC = () => {
       }
 
       try {
-        const res = await fetch('http://localhost:3000/api/auth/token', {
+        const res = await fetch(`${config.API_BASE_URL}/auth/token`, {
           method: 'POST',
           credentials: 'include',
         });

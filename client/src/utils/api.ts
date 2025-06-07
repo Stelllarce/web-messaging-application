@@ -1,3 +1,5 @@
+import config from '../config';
+
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const accessToken = localStorage.getItem('accessToken');
 
@@ -11,7 +13,7 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   });
 
   if (res.status === 403) {
-    const refreshRes = await fetch('http://localhost:3000/api/auth/token', {
+    const refreshRes = await fetch(`${config.API_BASE_URL}/auth/token`, {
       method: 'POST',
       credentials: 'include',
     });
@@ -37,16 +39,16 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
 export const storeUserIdFromApi = async () => {
   try {
-    const res = await fetchWithAuth('http://localhost:3000/api/auth/me');
-    if (!res.ok) throw new Error('Неуспешна заявка към /auth/id');
+    const res = await fetchWithAuth(`${config.API_BASE_URL}/auth/me`);
+    if (!res.ok) throw new Error('Unsuccessful call to /auth/id');
 
     const data = await res.json();
-    if (!data.id) throw new Error('ID не е намерено в отговора');
+    if (!data.id) throw new Error('User ID not found in response');
 
     localStorage.setItem('userId', data.id);
     return data.id;
   } catch (err) {
-    console.error('Грешка при вземане на userId:', err);
+    console.error('Failed to extract user ID', err);
     return null;
   }
 };

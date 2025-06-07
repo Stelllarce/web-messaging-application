@@ -1,5 +1,7 @@
+import config from '../config';
+
 export const logout = async () => {
-  await fetch('http://localhost:3000/api/auth/logout', {
+  await fetch(`${config.API_BASE_URL}/auth/logout`, {
     method: 'POST',
     credentials: 'include',
   });

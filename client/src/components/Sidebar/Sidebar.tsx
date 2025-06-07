@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Sidebar.css';
 import { fetchWithAuth } from '../../utils/api';
+import config from '../../config';
 
 interface Channel {
   _id: string;
@@ -56,24 +57,24 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const fetchChannels = async () => {
     try {
-      const pubRes = await fetchWithAuth('http://localhost:3000/api/channels?type=public');
+      const pubRes = await fetchWithAuth(`${config.API_BASE_URL}/channels?type=public`);
       const pubData = await pubRes.json();
       setPublicChannels(pubData);
 
-      const privRes = await fetchWithAuth('http://localhost:3000/api/channels?type=private');
+      const privRes = await fetchWithAuth(`${config.API_BASE_URL}/channels?type=private`);
       const privData = await privRes.json();
       setPrivateChannels(privData);
 
       console.log('Public channels:', pubData);
       console.log('Private channels:', privData);
     } catch (err) {
-      console.error('Грешка при зареждане на каналите:', err);
+      console.error('Failed to fetch channels:', err);
     }
   };
 
   const fetchUsername = async () => {
     try {
-      const res = await fetchWithAuth('http://localhost:3000/api/auth/me');
+      const res = await fetchWithAuth(`${config.API_BASE_URL}/auth/me`);
       if (!res.ok) throw new Error('Failed to fetch user data');
       const data = await res.json();
       setUsername(data.username);
@@ -85,7 +86,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleCreateChannel = async () => {
     try {
-      const res = await fetchWithAuth('http://localhost:3000/api/channels', {
+      const res = await fetchWithAuth(`${config.API_BASE_URL}/channels`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
