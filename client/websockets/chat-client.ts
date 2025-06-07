@@ -29,6 +29,7 @@ export class ChatClient {
   private channelCreatedCallbacks: ((channel: ChannelInfo) => void)[] = [];
   private channelAddedCallbacks: ((channel: ChannelInfo) => void)[] = [];
   private channelRemovedCallbacks: ((channel: ChannelInfo) => void)[] = [];
+  private channelDeletedCallbacks: ((channel: ChannelInfo) => void)[] = [];
   private identifiedCallbacks: ((response: IdentifiedResponse) => void)[] = [];
   private channelMessagesCallbacks: ((data: { channel: string; messages: ChatMessage[] }) => void)[] = [];
   private errorCallbacks: ((error: string) => void)[] = [];
@@ -103,6 +104,13 @@ export class ChatClient {
       // Remove the channel from the local channels list
       this.channels = this.channels.filter(c => c.id !== channel.id);
       this.channelRemovedCallbacks.forEach(callback => callback(channel));
+    });
+    
+    // Handle channel deletion
+    this.socket.on('channelDeleted', (channel: ChannelInfo) => {
+      // Remove the channel from the local channels list
+      this.channels = this.channels.filter(c => c.id !== channel.id);
+      this.channelDeletedCallbacks.forEach(callback => callback(channel));
     });
     
     // Handle online notifications
@@ -214,6 +222,10 @@ export class ChatClient {
 
   onChannelRemoved(callback: (channel: ChannelInfo) => void): void {
     this.channelRemovedCallbacks.push(callback);
+  }
+
+  onChannelDeleted(callback: (channel: ChannelInfo) => void): void {
+    this.channelDeletedCallbacks.push(callback);
   }
 
   onIdentified(callback: (response: IdentifiedResponse) => void): void {

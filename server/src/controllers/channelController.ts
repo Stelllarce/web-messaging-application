@@ -349,6 +349,52 @@ channelController.delete('/:id', verifyToken, async (req: Request, res: Response
         return;
     }
 
+    // Notify all users in the channel before deletion
+    const io = getSocketIO();
+    
+    if (channel.type === 'private' && channel.users) {
+        // Emit channelDeleted event to the entire channel room
+        if (io) {
+            io.to(channel._id.toString()).emit('channelDeleted', {
+                id: channel._id.toString(),
+                name: channel.name,
+                type: channel.type,
+                creator: channel.creator
+            });
+        }
+
+        // Also emit channelRemoved to individual users for backward compatibility
+        for (const userId of channel.users) {
+            emitToUser(userId.toString(), 'channelRemoved', {
+                id: channel._id.toString(),
+                name: channel.name,
+                type: channel.type,
+                creator: channel.creator
+            });
+        }
+
+        // Remove all users from the channel socket room
+        if (io) {
+            const sockets = await io.fetchSockets();
+            for (const socket of sockets) {
+                const socketUser = (socket as any).user;
+                if (socketUser && channel.users.some(userId => userId.toString() === socketUser._id)) {
+                    socket.leave(channel._id.toString());
+                }
+            }
+        }
+    } else if (channel.type === 'public') {
+        // For public channels, emit to the channel room
+        if (io) {
+            io.to(channel._id.toString()).emit('channelDeleted', {
+                id: channel._id.toString(),
+                name: channel.name,
+                type: channel.type,
+                creator: channel.creator
+            });
+        }
+    }
+
     await deleteChannel(id);
     res.status(204).send();
 });
