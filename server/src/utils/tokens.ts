@@ -1,7 +1,7 @@
 import { sign } from "jsonwebtoken";
 
 import { IUser, IUserTokenPayload } from "../models/User";
-import { IToken, IRefreshToken } from "../interfaces/tokenInterface";
+import { IRefreshToken } from "../interfaces/tokenInterface";
 
 import { RefreshTokenModel } from "../models/tokenModel";
 
@@ -25,7 +25,7 @@ export const generateAccessToken = (user: IUser) => {
 }
 
 export const saveRefreshToken = (refreshToken: IRefreshToken) => {
-    
+
     const toAddToken = refreshToken.refreshToken;
 
     const token = new RefreshTokenModel({

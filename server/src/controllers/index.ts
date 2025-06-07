@@ -5,14 +5,10 @@ import { channelController } from "./channelController"
 const apiController = Router();
 
 export const connect = (app : Application): void => {
-    
+
     apiController.use('/auth', authController) // api/auth/
     apiController.use('/channels', channelController) // api/channels/
 
-    // apiController.use('/fdsf', ...)
-    // apiController.use('/fdsf', ...)
-    // apiController.use('/fdsf', ...)
-
     app.use('/api', apiController);
-    
+
 }

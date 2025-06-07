@@ -7,5 +7,5 @@
 }
 
 .container.options-open .chat {
-  flex: 0 0 calc(100% - 600px); /* sidebar 300px + options 300px */
+  flex: 0 0 calc(100% - 600px); 
 }

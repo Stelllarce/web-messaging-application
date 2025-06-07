@@ -1,6 +1,5 @@
 import React from 'react';
 import './InputArea.css';
-// import { channel } from 'diagnostics_channel';
 
 interface Props {
   channelId: string;

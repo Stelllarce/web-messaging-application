@@ -29,7 +29,6 @@
   color: white;
 }
 
-/* Channel users */
 .channel-users {
   margin-top: 20px;
   border-top: 1px solid #ddd;
@@ -53,7 +52,6 @@
   word-break: break-word;
 }
 
-/* Reusable button style (used in modals and sidebar) */
 .create-btn {
   background: #4F46E5;
   color: white;
@@ -94,7 +92,6 @@ Create button wrapper
   justify-content: center;
 }
 
-/* Modal overlay and box */
 .modal-overlay {
   position: fixed;
   top: 0;

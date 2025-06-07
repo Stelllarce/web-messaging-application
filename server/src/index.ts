@@ -7,11 +7,10 @@ import http from 'http';
 import { Server, Socket } from 'socket.io';
 import path from 'path';
 import { verify } from 'jsonwebtoken';
-import { seedData } from './utils/database';
 import { connect as connectAPI } from "./controllers/index";
-import { User, IUser, IUserTokenPayload } from './models/User';
-import { Channel, IChannel } from './models/Channel';
-import { Message, IMessage } from './models/Message';
+import { User, IUserTokenPayload } from './models/User';
+import { Channel } from './models/Channel';
+import { Message } from './models/Message';
 import { ChatMessage, ChannelEvent, SocketUser } from './interfaces/types';
 import { setSocketIO, addUserSocket, removeUserSocket } from './socket/socketManager';
 
@@ -51,8 +50,8 @@ connectAPI(app);
 
 // Health check endpoint for CI/CD
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'ok', 
+  res.status(200).json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
     service: 'web-messaging-app-server'
   });
@@ -74,9 +73,6 @@ mongoose.connect(mongoUri)
     console.error('Error while connecting MongoDB:', err);
     process.exit(1);
   });
-
-
-
 
   app.use((req, res, next) => {
   console.log(`[${req.method}] ${req.url}`);

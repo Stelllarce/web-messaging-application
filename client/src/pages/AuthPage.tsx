@@ -7,7 +7,7 @@ import config from '../config';
 
 const AuthPage: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const navigate = useNavigate(); // 👈 тук е магията
+  const navigate = useNavigate(); 
 
   const handleLogin = async (username: string, password: string) => {
     try {

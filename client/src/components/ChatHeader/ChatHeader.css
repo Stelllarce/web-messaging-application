@@ -5,17 +5,15 @@
   font-size: 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 👈 ново */
-  padding-right: 15px; /* 👈 за малко отстояние вдясно */
+  justify-content: space-between;
+  padding-right: 15px; 
 }
 
-/* Бутоните са в общ контейнер вдясно */
 .header-buttons {
   display: flex;
   gap: 10px;
 }
 
-/* Опции бутон */
 .options-btn,
 .logout-btn {
   background: #4F46E5;

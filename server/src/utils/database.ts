@@ -94,7 +94,6 @@ export async function seedData(force = false) {
   const channelsCount = await Channel.countDocuments();
 
   if (!force && (usersCount > 0 || channelsCount > 0)) {
-    // console.log('Данните вече съществуват, пропускаме seed.');
     return;
   }
 
@@ -104,11 +103,6 @@ export async function seedData(force = false) {
     await Message.deleteMany({});
   }
 }
-
-
-
-
-
 
 export const getPrivateChannelsByUserId = async (userId: string) => {
 
