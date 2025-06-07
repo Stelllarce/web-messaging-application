@@ -1,9 +1,8 @@
 import { Router, Request, Response } from "express";
 import { Channel } from "../models/Channel";
-import { User } from "../models/User";
+import { User, IAuthenticatedUserRequest } from "../models/User";
 import { Message } from "../models/Message";
 import { verifyToken } from "../middlewares/verifyToken";
-import { IUser, IAuthenticatedUserRequest } from "../models/User";
 import { deleteChannel, getPrivateChannelsByUserId } from "../utils/database";
 import { emitToUser, getSocketIO } from "../socket/socketManager";
 
@@ -308,6 +307,26 @@ channelController.patch('/:id/users/remove', verifyToken, async (req: Request, r
     await channel.save();
     user.privateChannels = user.privateChannels.filter(c => c.toString() !== channel._id.toString());
     await user.save();
+
+    // Emit websocket event to notify the removed user about channel removal
+    emitToUser(user._id.toString(), 'channelRemoved', {
+        id: channel._id.toString(),
+        name: channel.name,
+        type: channel.type
+    });
+
+    // Also remove the user from the channel socket room
+    const io = getSocketIO();
+    if (io) {
+        // Find all sockets for this user and remove them from the channel
+        const sockets = await io.fetchSockets();
+        const userSocket = sockets.find(socket => 
+            (socket as any).user && (socket as any).user._id === user._id.toString()
+        );
+        if (userSocket) {
+            userSocket.leave(channel._id.toString());
+        }
+    }
 
     await channel.populate('users', '_id username');
     res.status(200).json(channel.users);

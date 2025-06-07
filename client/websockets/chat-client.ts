@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { ChatMessage, ChannelEvent, SocketUser } from '../../server/src/interfaces/types';
+import { ChatMessage, ChannelEvent } from '../../server/src/interfaces/types';
 
 // Define interfaces for client-side types
 interface ChannelInfo {
@@ -28,6 +28,7 @@ export class ChatClient {
   private channelListCallbacks: ((channels: ChannelInfo[]) => void)[] = [];
   private channelCreatedCallbacks: ((channel: ChannelInfo) => void)[] = [];
   private channelAddedCallbacks: ((channel: ChannelInfo) => void)[] = [];
+  private channelRemovedCallbacks: ((channel: ChannelInfo) => void)[] = [];
   private identifiedCallbacks: ((response: IdentifiedResponse) => void)[] = [];
   private channelMessagesCallbacks: ((data: { channel: string; messages: ChatMessage[] }) => void)[] = [];
   private errorCallbacks: ((error: string) => void)[] = [];
@@ -95,6 +96,13 @@ export class ChatClient {
         this.channels.push(channel);
       }
       this.channelAddedCallbacks.forEach(callback => callback(channel));
+    });
+    
+    // Handle being removed from a channel
+    this.socket.on('channelRemoved', (channel: ChannelInfo) => {
+      // Remove the channel from the local channels list
+      this.channels = this.channels.filter(c => c.id !== channel.id);
+      this.channelRemovedCallbacks.forEach(callback => callback(channel));
     });
     
     // Handle online notifications
@@ -202,6 +210,10 @@ export class ChatClient {
 
   onChannelAdded(callback: (channel: ChannelInfo) => void): void {
     this.channelAddedCallbacks.push(callback);
+  }
+
+  onChannelRemoved(callback: (channel: ChannelInfo) => void): void {
+    this.channelRemovedCallbacks.push(callback);
   }
 
   onIdentified(callback: (response: IdentifiedResponse) => void): void {

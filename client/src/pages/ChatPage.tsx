@@ -99,6 +99,16 @@ const ChatPage: React.FC = () => {
       setRefreshSidebarTrigger(prev => prev + 1);
     });
 
+    chatClientRef.current.onChannelRemoved((channel) => {
+      console.log(`Removed from channel: ${channel.name}`);
+      // If the user is currently viewing the removed channel, redirect them
+      if (currentChannel._id === channel.id) {
+        setCurrentChannel({ _id: '', name: '', creator: '', type: 'public' });
+        setMessages([]);
+      }
+      setRefreshSidebarTrigger(prev => prev + 1);
+    });
+
     chatClientRef.current.onError((error) => {
       console.error('Socket error:', error);
     });
