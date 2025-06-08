@@ -127,6 +127,17 @@ channelController.post('/', verifyToken, async (req: Request, res: Response) => 
     }
     else {
         await channel.save();
+        
+        // Emit real-time event for public channel creation
+        const io = getSocketIO();
+        if (io) {
+            io.emit('publicChannelAdded', {
+                id: channel._id.toString(),
+                name: channel.name,
+                type: channel.type,
+                creator: channel.creator
+            });
+        }
     }
 
     res.status(201).json(channel);
@@ -193,6 +204,20 @@ channelController.patch('/:id', verifyToken, async (req: Request, res: Response)
 
     channel.name = newName;
     await channel.save();
+    
+    // Emit real-time event for public channel name update
+    if (channel.type === 'public') {
+        const io = getSocketIO();
+        if (io) {
+            io.emit('publicChannelUpdated', {
+                id: channel._id.toString(),
+                name: channel.name,
+                type: channel.type,
+                creator: channel.creator
+            });
+        }
+    }
+    
     res.status(200).json(channel);
 });
 
@@ -302,6 +327,21 @@ channelController.patch('/:id/users/remove', verifyToken, async (req: Request, r
         return;
     }
 
+    // Emit kicked notification to all remaining users in the channel BEFORE removing the user
+    const io = getSocketIO();
+    if (io) {
+        const kickedMessage = {
+            sender: 'System',
+            content: `${username} kicked`,
+            timestamp: new Date(),
+            channel: channel._id.toString()
+        };
+        
+        console.log(`Emitting userKicked event for ${username} in channel ${channel._id}`);
+        // Emit to all users in the channel EXCEPT the user being removed
+        io.to(channel._id.toString()).emit('userKicked', kickedMessage);
+    }
+
     // Remove user from channel and channel from user
     channel.users = channel.users.filter(u => u.toString() !== user._id.toString());
     await channel.save();
@@ -316,7 +356,6 @@ channelController.patch('/:id/users/remove', verifyToken, async (req: Request, r
     });
 
     // Also remove the user from the channel socket room
-    const io = getSocketIO();
     if (io) {
         // Find all sockets for this user and remove them from the channel
         const sockets = await io.fetchSockets();
@@ -384,9 +423,9 @@ channelController.delete('/:id', verifyToken, async (req: Request, res: Response
             }
         }
     } else if (channel.type === 'public') {
-        // For public channels, emit to the channel room
+        // For public channels, emit to all users
         if (io) {
-            io.to(channel._id.toString()).emit('channelDeleted', {
+            io.emit('publicChannelRemoved', {
                 id: channel._id.toString(),
                 name: channel.name,
                 type: channel.type,

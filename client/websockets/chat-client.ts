@@ -16,26 +16,27 @@ interface IdentifiedResponse {
 }
 
 export class ChatClient {
-  private socket: Socket;
+  private readonly socket: Socket;
   private currentChannel: string = '';
   private username: string = '';
   private userId: string = '';
   private channels: ChannelInfo[] = [];
   
   // Event callbacks
-  private messageCallbacks: ((message: ChatMessage) => void)[] = [];
-  private userJoinedCallbacks: ((event: ChannelEvent) => void)[] = [];
-  private userLeftCallbacks: ((event: ChannelEvent) => void)[] = [];
-  private channelListCallbacks: ((channels: ChannelInfo[]) => void)[] = [];
-  private channelCreatedCallbacks: ((channel: ChannelInfo) => void)[] = [];
-  private channelAddedCallbacks: ((channel: ChannelInfo) => void)[] = [];
-  private channelRemovedCallbacks: ((channel: ChannelInfo) => void)[] = [];
-  private channelDeletedCallbacks: ((channel: ChannelInfo) => void)[] = [];
-  private identifiedCallbacks: ((response: IdentifiedResponse) => void)[] = [];
-  private channelMessagesCallbacks: ((data: { channel: string; messages: ChatMessage[] }) => void)[] = [];
-  private errorCallbacks: ((error: string) => void)[] = [];
-  private onlineNotificationCallbacks: ((message: { sender: string; content: string; timestamp: Date }) => void)[] = [];
-  private offlineNotificationCallbacks: ((message: { sender: string; content: string; timestamp: Date }) => void)[] = [];
+  private readonly messageCallbacks: ((message: ChatMessage) => void)[] = [];
+  private readonly userJoinedCallbacks: ((event: ChannelEvent) => void)[] = [];
+  private readonly userLeftCallbacks: ((event: ChannelEvent) => void)[] = [];
+  private readonly channelListCallbacks: ((channels: ChannelInfo[]) => void)[] = [];
+  private readonly channelCreatedCallbacks: ((channel: ChannelInfo) => void)[] = [];
+  private readonly channelAddedCallbacks: ((channel: ChannelInfo) => void)[] = [];
+  private readonly channelRemovedCallbacks: ((channel: ChannelInfo) => void)[] = [];
+  private readonly channelDeletedCallbacks: ((channel: ChannelInfo) => void)[] = [];
+  private readonly identifiedCallbacks: ((response: IdentifiedResponse) => void)[] = [];
+  private readonly channelMessagesCallbacks: ((data: { channel: string; messages: ChatMessage[] }) => void)[] = [];
+  private readonly errorCallbacks: ((error: string) => void)[] = [];
+  private readonly onlineNotificationCallbacks: ((message: { sender: string; content: string; timestamp: Date }) => void)[] = [];
+  private readonly offlineNotificationCallbacks: ((message: { sender: string; content: string; timestamp: Date }) => void)[] = [];
+  private readonly userKickedCallbacks: ((message: { sender: string; content: string; timestamp: Date; channel: string }) => void)[] = [];
   
 
   constructor(url?: string, token?: string) {
@@ -109,7 +110,6 @@ export class ChatClient {
     
     // Handle channel deletion
     this.socket.on('channelDeleted', (channel: ChannelInfo) => {
-      // Remove the channel from the local channels list
       this.channels = this.channels.filter(c => c.id !== channel.id);
       this.channelDeletedCallbacks.forEach(callback => callback(channel));
     });
@@ -130,6 +130,37 @@ export class ChatClient {
         message.timestamp = new Date(message.timestamp);
       }
       this.offlineNotificationCallbacks.forEach(callback => callback(message));
+    });
+    
+    // Handle user kicked notifications
+    this.socket.on('userKicked', (message: { sender: string; content: string; timestamp: Date; channel: string }) => {
+      // Convert timestamp string to Date object if needed
+      if (typeof message.timestamp === 'string') {
+        message.timestamp = new Date(message.timestamp);
+      }
+      this.userKickedCallbacks.forEach(callback => callback(message));
+    });
+    
+    // Handle public channel events
+    this.socket.on('publicChannelAdded', (channel: ChannelInfo) => {
+      const existingChannel = this.channels.find(c => c.id === channel.id);
+      if (!existingChannel) {
+        this.channels.push(channel);
+      }
+      this.channelAddedCallbacks.forEach(callback => callback(channel));
+    });
+    
+    this.socket.on('publicChannelRemoved', (channel: ChannelInfo) => {
+      this.channels = this.channels.filter(c => c.id !== channel.id);
+      this.channelRemovedCallbacks.forEach(callback => callback(channel));
+    });
+
+    this.socket.on('publicChannelUpdated', (channel: ChannelInfo) => {
+      const existingChannelIndex = this.channels.findIndex(c => c.id === channel.id);
+      if (existingChannelIndex !== -1) {
+        this.channels[existingChannelIndex] = channel;
+      }
+      this.channelAddedCallbacks.forEach(callback => callback(channel));
     });
     
     this.socket.on('error', (error: string) => {
@@ -247,6 +278,10 @@ export class ChatClient {
   
   onOfflineNotification(callback: (message: { sender: string; content: string; timestamp: Date }) => void): void {
     this.offlineNotificationCallbacks.push(callback);
+  }
+  
+  onUserKicked(callback: (message: { sender: string; content: string; timestamp: Date; channel: string }) => void): void {
+    this.userKickedCallbacks.push(callback);
   }
   
   disconnect(): void {

@@ -102,7 +102,6 @@ const ChatPage: React.FC = () => {
 
     chatClientRef.current.onChannelRemoved((channel) => {
       console.log(`Removed from channel: ${channel.name}`);
-      // If the user is currently viewing the removed channel, redirect them
       if (currentChannel._id === channel.id) {
         setCurrentChannel({ _id: '', name: '', creator: '', type: 'public' });
         setMessages([]);
@@ -112,7 +111,6 @@ const ChatPage: React.FC = () => {
 
     chatClientRef.current.onChannelDeleted((channel) => {
       console.log(`Channel deleted: ${channel.name}`);
-      // If the user is currently viewing the deleted channel, redirect them
       if (currentChannel._id === channel.id) {
         setCurrentChannel({ _id: '', name: '', creator: '', type: 'public' });
         setMessages([]);
@@ -145,6 +143,22 @@ const ChatPage: React.FC = () => {
         timestamp: format(new Date(notification.timestamp), 'dd.MM.yyyy HH:mm')
       };
       setMessages(prev => [...prev, systemMessage]);
+    });
+
+    chatClientRef.current.onUserKicked((notification) => {
+      
+      const systemMessage = {
+        id: `${Date.now()}-${Math.random()}`,
+        from: "System",
+        text: notification.content,
+        side: 'system' as const,
+        timestamp: format(new Date(notification.timestamp), 'dd.MM.yyyy HH:mm')
+      };
+      
+      setMessages(prev => {
+        console.log('Adding kicked message to messages');
+        return [...prev, systemMessage];
+      });
     });
   };
 
